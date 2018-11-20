@@ -1,5 +1,2 @@
-# Ignore everything in this directory
+# Ignore all png files in data/
 *.png
-# Except this file
-# !.gitignore
-# !SVHN/train/labels.pkl
