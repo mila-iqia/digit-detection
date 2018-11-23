@@ -9,6 +9,7 @@ Step 1:  Download SVHN data in to data/SVHN/train
 import pickle
 import h5py
 
+
 def get_box_data(index, hdf5_data):
     """
     get `left, top, width, height` of each picture
@@ -91,7 +92,8 @@ def convert_mat_file(data_dir, filename_mat, filename_out='labels'):
 
 if __name__ == '__main__':
 
-    data_dir = 'data/SVHN/train/'
-    filename_mat = 'data/SVHN/train/digitStruct.mat'
+    split = 'extra'
+    data_dir = '../../data/SVHN/' + split + '/'
+    filename_mat = '../../data/SVHN/' + split + '/digitStruct.mat'
 
     convert_mat_file(data_dir, filename_mat)
