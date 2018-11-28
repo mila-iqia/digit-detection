@@ -123,13 +123,13 @@ def train_model(model, train_loader, valid_loader, device,
 
 def prepare_dataloaders(batch_size=32):
 
-    filename = 'labels'
-
     traindata_dir = 'data/SVHN/train/'
+    filename = 'train_metadata'
     metadata_train = load_obj(traindata_dir, filename)
 
     #  extradata_dir = 'data/SVHN/extra/'
     #  metadata_extra = load_obj(extradata_dir, filename)
+    filename = 'extra_metadata'
 
     firstcrop = FirstCrop(0.3)
     rescale = Rescale((64, 64))
