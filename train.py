@@ -1,3 +1,4 @@
+import copy
 import time
 
 import numpy as np
@@ -20,6 +21,7 @@ def train_model(model, train_loader, valid_loader, device,
     train_loss_history = []
     valid_loss_history = []
     valid_accuracy_history = []
+    valid_best_accuracy = 0
     optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     loss_ndigits = torch.nn.CrossEntropyLoss()
 
@@ -93,12 +95,18 @@ def train_model(model, train_loader, valid_loader, device,
 
         train_loss_history.append(train_loss / train_n_iter)
         valid_loss_history.append(valid_loss / valid_n_iter)
-        valid_accuracy_history.append(valid_correct / valid_n_iter)
+        valid_accuracy = valid_correct / valid_n_samples
 
         print('\nEpoch: {}/{}'.format(epoch + 1, num_epochs))
         print('\tTrain Loss: {:.4f}'.format(train_loss / train_n_iter))
         print('\tValid Loss: {:.4f}'.format(valid_loss / valid_n_iter))
-        print('\tValid Accuracy: {:.4f}'.format(valid_correct / valid_n_samples))
+        print('\tValid Accuracy: {:.4f}'.format(valid_accuracy))
+
+        if valid_accuracy > valid_best_accuracy:
+            valid_best_accuracy = valid_accuracy
+            best_model = copy.deepcopy(model)
+            print('Checkpointing new model...')
+        valid_accuracy_history.append(valid_accuracy)
 
     time_elapsed = time.time() - since
 
@@ -109,8 +117,8 @@ def train_model(model, train_loader, valid_loader, device,
         print('Saving model ...')
         timestr = time.strftime("_%Y%m%d_%H%M%S")
         model_filename = 'models/' + model_filename + timestr + '.pth'
-        torch.save(model, model_filename)
-        print('Model saved to :', model_filename)
+        torch.save(best_model, model_filename)
+        print('Best model saved to :', model_filename)
 
 
 def prepare_dataloaders(batch_size=32):
@@ -191,4 +199,4 @@ if __name__ == "__main__":
                 train_loader=sample_loader,
                 valid_loader=sample_loader,
                 device=device,
-                model_filename=model_filename)
+                model_filename=None)
