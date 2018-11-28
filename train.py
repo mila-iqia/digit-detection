@@ -1,0 +1,194 @@
+import time
+
+import numpy as np
+import torch
+
+from torchvision import transforms
+from torch.utils.data import DataLoader
+
+from utils.dataloader import SVHNDataset
+from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
+from utils.utils import load_obj
+from models.models import BaselineCNN
+
+
+def train_model(model, train_loader, valid_loader, device,
+                num_epochs=10, lr=0.001, model_filename=None):
+
+    since = time.time()
+    model.to(device)
+    train_loss_history = []
+    valid_loss_history = []
+    valid_accuracy_history = []
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    loss_ndigits = torch.nn.CrossEntropyLoss()
+
+    print("# Start training #")
+    for epoch in range(num_epochs):
+
+        train_loss = 0
+        train_n_iter = 0
+
+        # Set model to train mode
+        model.train()
+
+        # Iterate over train data
+        for i, batch in enumerate(sample_loader):
+            # get the inputs
+            inputs, targets = batch['image'], batch['target']
+
+            inputs = inputs.to(device)
+            target_ndigits = targets[:, 0].long()
+
+            target_ndigits.to(device)
+
+            # Zero the gradient buffer
+            optimizer.zero_grad()
+
+            # Forward
+            outputs = model(inputs)
+
+            loss = loss_ndigits(outputs, target_ndigits)
+
+            # Backward
+            loss.backward()
+
+            # Optimize
+            optimizer.step()
+
+            # Statistics
+            train_loss += loss.item()
+            train_n_iter += 1
+
+        valid_loss = 0
+        valid_n_iter = 0
+        valid_correct = 0
+        valid_n_samples = 0
+
+        # Set model to evaluate mode
+        model.eval()
+
+        # Iterate over valid data
+        # Iterate over train data
+        for i, batch in enumerate(valid_loader):
+            # get the inputs
+            inputs, targets = batch['image'], batch['target']
+
+            inputs = inputs.to(device)
+
+            target_ndigits = targets[:, 0].long()
+            target_ndigits.to(device)
+
+            # Forward
+            outputs = model(inputs)
+
+            loss = loss_ndigits(outputs, target_ndigits)
+
+            # Statistics
+            valid_loss += loss.item()
+            valid_n_iter += 1
+            _, predicted = torch.max(outputs.data, 1)
+            valid_correct += (predicted == target_ndigits).sum().item()
+            valid_n_samples += target_ndigits.size(0)
+
+        train_loss_history.append(train_loss / train_n_iter)
+        valid_loss_history.append(valid_loss / valid_n_iter)
+        valid_accuracy_history.append(valid_correct / valid_n_iter)
+
+        print('\nEpoch: {}/{}'.format(epoch + 1, num_epochs))
+        print('\tTrain Loss: {:.4f}'.format(train_loss / train_n_iter))
+        print('\tValid Loss: {:.4f}'.format(valid_loss / valid_n_iter))
+        print('\tValid Accuracy: {:.4f}'.format(valid_correct / valid_n_samples))
+
+    time_elapsed = time.time() - since
+
+    print('\n\nTraining complete in {:.0f}m {:.0f}s'.format(
+        time_elapsed // 60, time_elapsed % 60))
+
+    if model_filename:
+        print('Saving model ...')
+        timestr = time.strftime("_%Y%m%d_%H%M%S")
+        model_filename = 'models/' + model_filename + timestr + '.pth'
+        torch.save(model, model_filename)
+        print('Model saved to :', model_filename)
+
+
+def prepare_dataloaders(batch_size=32):
+
+    filename = 'labels'
+
+    traindata_dir = 'data/SVHN/train/'
+    metadata_train = load_obj(traindata_dir, filename)
+
+    #  extradata_dir = 'data/SVHN/extra/'
+    #  metadata_extra = load_obj(extradata_dir, filename)
+
+    firstcrop = FirstCrop(0.3)
+    rescale = Rescale((64, 64))
+    random_crop = RandomCrop((54, 54))
+    to_tensor = ToTensor()
+
+    # Declare transformations
+    transform = transforms.Compose([firstcrop,
+                                    rescale,
+                                    random_crop,
+                                    to_tensor])
+
+    dataset = SVHNDataset(metadata_train,
+                          data_dir=traindata_dir,
+                          transform=transform)
+
+    indices = np.arange(len(metadata_train))
+    indices = np.random.permutation(indices)
+
+    train_idx = indices[:round(0.8*len(indices))]
+    valid_idx = indices[round(0.8*len(indices)):]
+    sample_idx = indices[:100]
+
+    train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
+    valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
+    sample_sampler = torch.utils.data.SubsetRandomSampler(sample_idx)
+
+    # Prepare dataloaders
+    train_loader = DataLoader(dataset,
+                              batch_size=batch_size,
+                              shuffle=False,
+                              num_workers=4,
+                              sampler=train_sampler)
+
+    valid_loader = DataLoader(dataset,
+                              batch_size=batch_size,
+                              shuffle=False,
+                              num_workers=4,
+                              sampler=valid_sampler)
+
+    sample_loader = DataLoader(dataset,
+                               batch_size=batch_size,
+                               shuffle=False,
+                               num_workers=4,
+                               sampler=sample_sampler)
+
+    return train_loader, valid_loader, sample_loader
+
+
+if __name__ == "__main__":
+
+    batch_size = 32
+
+    (train_loader,
+     valid_loader,
+     sample_loader) = prepare_dataloaders(batch_size)
+
+    # Define model architecture
+    baseline_cnn = BaselineCNN()
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    print("Device used: ", device)
+
+    model_filename = "my_model"
+
+    train_model(baseline_cnn,
+                train_loader=sample_loader,
+                valid_loader=sample_loader,
+                device=device,
+                model_filename=model_filename)
