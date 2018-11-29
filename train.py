@@ -35,7 +35,7 @@ def train_model(model, train_loader, valid_loader, device,
         model.train()
 
         # Iterate over train data
-        for i, batch in enumerate(sample_loader):
+        for i, batch in enumerate(train_loader):
             # get the inputs
             inputs, targets = batch['image'], batch['target']
 
@@ -121,11 +121,11 @@ def train_model(model, train_loader, valid_loader, device,
         print('Best model saved to :', model_filename)
 
 
-def prepare_dataloaders(batch_size=32):
+def prepare_dataloaders(batch_size=32, sample_size=None):
 
-    traindata_dir = 'data/SVHN/train/'
+    train_metadir = 'data/SVHN/'
     filename = 'train_metadata'
-    metadata_train = load_obj(traindata_dir, filename)
+    metadata_train = load_obj(train_metadir, filename)
 
     #  extradata_dir = 'data/SVHN/extra/'
     #  metadata_extra = load_obj(extradata_dir, filename)
@@ -137,25 +137,32 @@ def prepare_dataloaders(batch_size=32):
     to_tensor = ToTensor()
 
     # Declare transformations
+    train_datadir = 'data/SVHN/train/'
+
     transform = transforms.Compose([firstcrop,
                                     rescale,
                                     random_crop,
                                     to_tensor])
 
     dataset = SVHNDataset(metadata_train,
-                          data_dir=traindata_dir,
+                          data_dir=train_datadir,
                           transform=transform)
 
     indices = np.arange(len(metadata_train))
     indices = np.random.permutation(indices)
 
-    train_idx = indices[:round(0.8*len(indices))]
-    valid_idx = indices[round(0.8*len(indices)):]
-    sample_idx = indices[:100]
+    if sample_size:
+        assert sample_size < len(dataset)/2, "Sample size is too big"
+        train_idx = indices[:sample_size]
+        valid_idx = indices[sample_size:2*sample_size]
+
+    else:
+
+        train_idx = indices[:round(0.8*len(indices))]
+        valid_idx = indices[round(0.8*len(indices)):]
 
     train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
     valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
-    sample_sampler = torch.utils.data.SubsetRandomSampler(sample_idx)
 
     # Prepare dataloaders
     train_loader = DataLoader(dataset,
@@ -170,22 +177,15 @@ def prepare_dataloaders(batch_size=32):
                               num_workers=4,
                               sampler=valid_sampler)
 
-    sample_loader = DataLoader(dataset,
-                               batch_size=batch_size,
-                               shuffle=False,
-                               num_workers=4,
-                               sampler=sample_sampler)
-
-    return train_loader, valid_loader, sample_loader
+    return train_loader, valid_loader
 
 
 if __name__ == "__main__":
 
     batch_size = 32
 
-    (train_loader,
-     valid_loader,
-     sample_loader) = prepare_dataloaders(batch_size)
+    train_loader, valid_loader = prepare_dataloaders(batch_size,
+                                                     sample_size=100)
 
     # Define model architecture
     baseline_cnn = BaselineCNN()
@@ -196,7 +196,7 @@ if __name__ == "__main__":
     model_filename = "my_model"
 
     train_model(baseline_cnn,
-                train_loader=sample_loader,
-                valid_loader=sample_loader,
+                train_loader=train_loader,
+                valid_loader=valid_loader,
                 device=device,
                 model_filename=None)
