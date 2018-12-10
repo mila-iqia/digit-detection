@@ -1,3 +1,4 @@
+import os
 import copy
 import time
 
@@ -116,12 +117,12 @@ def train_model(model, train_loader, valid_loader, device,
     if model_filename:
         print('Saving model ...')
         timestr = time.strftime("_%Y%m%d_%H%M%S")
-        model_filename = 'models/' + model_filename + timestr + '.pth'
+        model_filename = model_filename + timestr + '.pth'
         torch.save(best_model, model_filename)
         print('Best model saved to :', model_filename)
 
 
-def prepare_dataloaders(batch_size=32, sample_size=None):
+def prepare_dataloaders(batch_size=32, sample_size=None, train_datadir=None):
 
     train_metadir = 'data/SVHN/'
     filename = 'train_metadata'
@@ -136,8 +137,10 @@ def prepare_dataloaders(batch_size=32, sample_size=None):
     random_crop = RandomCrop((54, 54))
     to_tensor = ToTensor()
 
+    #  train_datadir = 'data/SVHN/train/'
+    # CHANGE TO --args from python command
+    train_datadir = os.environ['DATA_DIR']+'/train'
     # Declare transformations
-    train_datadir = 'data/SVHN/train/'
 
     transform = transforms.Compose([firstcrop,
                                     rescale,
@@ -182,6 +185,8 @@ def prepare_dataloaders(batch_size=32, sample_size=None):
 
 if __name__ == "__main__":
 
+    # CHANGE TO --args from python command
+    results_dir = os.environ['RESULTS_DIR']
     batch_size = 32
 
     train_loader, valid_loader = prepare_dataloaders(batch_size,
@@ -193,7 +198,7 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
-    model_filename = "my_model"
+    model_filename = results_dir + "my_model"
 
     train_model(baseline_cnn,
                 train_loader=train_loader,

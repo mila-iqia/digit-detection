@@ -1,5 +1,7 @@
 export DATA_DIR='/Tmp/'$USER'/data/SVHN'
+export RESULTS_DIR='/Tmp/'$USER'/results/SVHN'
 mkdir -p $DATA_DIR
+mkdir -p RESULTS_DIR
 
 if [ ! -d $DATA_DIR/train ]; then
     echo "Downloading files for the training set!"
@@ -10,3 +12,10 @@ if [ ! -d $DATA_DIR/train ]; then
 else
     echo "Train files already present"
 fi
+
+# python train.py
+cp -r $RESULTS_DIR /u/$USER 
+
+echo "Cleaning up data..."
+rm -r $DATA_DIR
+rm -r $RESULTS_DIR
