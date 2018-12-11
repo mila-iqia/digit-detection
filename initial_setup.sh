@@ -1,5 +1,5 @@
-export TMP_DATA_DIR=$HOME'/Tmp/'$USER'/data/SVHN'
-export TMP_RESULTS_DIR=$HOME'/Tmp/'$USER'/results'
+export TMP_DATA_DIR='/Tmp/'$USER'/data/SVHN'
+export TMP_RESULTS_DIR='/Tmp/'$USER'/results'
 export ROOT_DIR=$HOME'/digit-detection'
 
 mkdir -p $TMP_DATA_DIR
