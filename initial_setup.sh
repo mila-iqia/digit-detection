@@ -12,10 +12,12 @@ if [ ! -d $DATA_DIR/train ]; then
 else
     echo "Train files already present"
 fi
+. /home/jerpint/miniconda3/etc/profile.d/conda.sh
+conda env create -f $ROOT_DIR'environment.yml'
+conda activate digit-detection
+python train.py
+# cp -r $RESULTS_DIR /u/$USER
 
-# python train.py
-cp -r $RESULTS_DIR /u/$USER 
-
-echo "Cleaning up data..."
-rm -r $DATA_DIR
-rm -r $RESULTS_DIR
+# echo "Cleaning up data..."
+# rm -r $DATA_DIR
+# rm -r $RESULTS_DIR
