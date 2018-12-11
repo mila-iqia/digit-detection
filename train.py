@@ -43,7 +43,7 @@ def train_model(model, train_loader, valid_loader, device,
             inputs = inputs.to(device)
             target_ndigits = targets[:, 0].long()
 
-            target_ndigits.to(device)
+            target_ndigits = target_ndigits.to(device)
 
             # Zero the gradient buffer
             optimizer.zero_grad()
@@ -80,7 +80,7 @@ def train_model(model, train_loader, valid_loader, device,
             inputs = inputs.to(device)
 
             target_ndigits = targets[:, 0].long()
-            target_ndigits.to(device)
+            target_ndigits = target_ndigits.to(device)
 
             # Forward
             outputs = model(inputs)
