@@ -184,11 +184,11 @@ def prepare_dataloaders(batch_size=32, sample_size=None, train_datadir=None):
 if __name__ == "__main__":
 
     # CHANGE TO --args from python command
-    results_dir = os.environ['RESULTS_DIR']
+    results_dir = os.environ['TMP_RESULTS_DIR']
     batch_size = 32
 
     # CHANGE TO --args from python command
-    train_datadir = os.environ['DATA_DIR']+'/train'
+    train_datadir = os.environ['TMP_DATA_DIR']+'/train'
     (train_loader,
      valid_loader) = prepare_dataloaders(batch_size,
                                          sample_size=100,
@@ -200,10 +200,10 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
-    model_filename = results_dir + "my_model"
+    model_filename = results_dir + "/my_model"
 
     train_model(baseline_cnn,
                 train_loader=train_loader,
                 valid_loader=valid_loader,
                 device=device,
-                model_filename=None)
+                model_filename=model_filename)
