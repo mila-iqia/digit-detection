@@ -186,12 +186,13 @@ if __name__ == "__main__":
     # CHANGE TO --args from python command
     results_dir = os.environ['TMP_RESULTS_DIR']
     batch_size = 32
+    num_epochs = 15
 
     # CHANGE TO --args from python command
     train_datadir = os.environ['TMP_DATA_DIR']+'/train'
     (train_loader,
      valid_loader) = prepare_dataloaders(batch_size,
-                                         sample_size=100,
+                                         sample_size=None,
                                          train_datadir=train_datadir)
 
     # Define model architecture
@@ -205,5 +206,6 @@ if __name__ == "__main__":
     train_model(baseline_cnn,
                 train_loader=train_loader,
                 valid_loader=valid_loader,
+                num_epochs=num_epochs,
                 device=device,
                 model_filename=model_filename)
