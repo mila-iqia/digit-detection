@@ -138,8 +138,6 @@ def prepare_dataloaders(batch_size=32, sample_size=None, train_datadir=None):
     to_tensor = ToTensor()
 
     #  train_datadir = 'data/SVHN/train/'
-    # CHANGE TO --args from python command
-    train_datadir = os.environ['DATA_DIR']+'/train'
     # Declare transformations
 
     transform = transforms.Compose([firstcrop,
@@ -189,8 +187,12 @@ if __name__ == "__main__":
     results_dir = os.environ['RESULTS_DIR']
     batch_size = 32
 
-    train_loader, valid_loader = prepare_dataloaders(batch_size,
-                                                     sample_size=100)
+    # CHANGE TO --args from python command
+    train_datadir = os.environ['DATA_DIR']+'/train'
+    (train_loader,
+     valid_loader) = prepare_dataloaders(batch_size,
+                                         sample_size=100,
+                                         train_datadir=train_datadir)
 
     # Define model architecture
     baseline_cnn = BaselineCNN()
