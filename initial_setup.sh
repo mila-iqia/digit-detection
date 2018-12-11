@@ -1,4 +1,4 @@
-DATA_DIR='/Tmp/'$USER'/data/SVHN'
+export DATA_DIR='/Tmp/'$USER'/data/SVHN'
 mkdir -p $DATA_DIR
 
 if [ ! -d $DATA_DIR/train ]; then
