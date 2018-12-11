@@ -1,3 +1,4 @@
+export DATA_DIR='data/milatmp1/'$USER 
 export TMP_DATA_DIR='/Tmp/'$USER'/data/SVHN'
 export TMP_RESULTS_DIR='/Tmp/'$USER'/results'
 export ROOT_DIR=$HOME'/digit-detection'
@@ -5,13 +6,19 @@ export ROOT_DIR=$HOME'/digit-detection'
 mkdir -p $TMP_DATA_DIR
 mkdir -p $TMP_RESULTS_DIR
 
+if [ ! -f $DATA_DIR'/train.tar.gz' ]; then
+    
+    echo "Downloading files for the training set!"
+    wget -P $DATA_DIR http://ufldl.stanford.edu/housenumbers/train.tar.gz
+fi
 
 if [ ! -d $TMP_DATA_DIR/train ]; then
-    echo "Downloading files for the training set!"
-    wget -P $TMP_DATA_DIR http://ufldl.stanford.edu/housenumbers/train.tar.gz
+
+    echo "Extracting Files to " $TMP_DATA_DIR
+    cp $DATA_DIR'/train.tar.gz' $TMP_DATA_DIR
     tar -xzf $TMP_DATA_DIR/train.tar.gz -C $TMP_DATA_DIR
-    echo "Download finished, cleaning up..."
-    rm $TMP_DATA_DIR/train.tar.gz
+    echo "Extraction finished!"
+
 else
     echo "Train files already present"
 fi
