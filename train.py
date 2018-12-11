@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 from utils.dataloader import SVHNDataset
 from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
-from utils.utils import load_obj
+from utils.misc import load_obj
 from models.models import BaselineCNN
 
 
