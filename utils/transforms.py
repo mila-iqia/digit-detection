@@ -148,8 +148,7 @@ class ToTensor(object):
         # i.e. the sequence 157 is represented by target [3,1,5,5,7,-1,-1]
         target = -np.ones(6)
         target[0] = len(labels)
-
-        for jj in range(len(labels)):
+        for jj in range(min(len(labels), 5)):
 
             target[jj+1] = labels[jj]
 
