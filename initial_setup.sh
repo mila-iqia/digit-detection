@@ -1,3 +1,5 @@
+#!/bin/bash
+
 export DATA_DIR='data/milatmp1/'$USER 
 export TMP_DATA_DIR='/Tmp/'$USER'/data/SVHN'
 export TMP_RESULTS_DIR='/Tmp/'$USER'/results'
