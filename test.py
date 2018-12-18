@@ -18,6 +18,8 @@ def test_model(model, test_loader, device,
     print("# Testing Model ... #")
     test_correct = 0
     test_n_samples = 0
+    y_true = []
+    y_pred = []
     for i, batch in enumerate(test_loader):
         # get the inputs
         inputs, targets = batch['image'], batch['target']
@@ -37,11 +39,20 @@ def test_model(model, test_loader, device,
         #  test_n_iter += 1
         _, predicted = torch.max(outputs.data, 1)
 
+        y_pred.extend(list(predicted.numpy()))
+        y_true.extend(list(target_ndigits.numpy()))
+
         test_correct += (predicted == target_ndigits).sum().item()
         test_n_samples += target_ndigits.size(0)
         test_accuracy = test_correct / test_n_samples
 
-    print('\tTest Set Accuracy: {:.4f}'.format(test_accuracy))
+    from sklearn.metrics import confusion_matrix
+
+    print("Confusion Matrix")
+    print("===============================")
+    print(confusion_matrix(y_true, y_pred, labels=range(0, 7)))
+    print("===============================")
+    print('\n\nTest Set Accuracy: {:.4f}'.format(test_accuracy))
 
     time_elapsed = time.time() - since
 
@@ -61,13 +72,13 @@ if __name__ == "__main__":
     datadir = 'data/SVHN'
     test_loader = prepare_dataloaders(dataset_split='test',
                                       batch_size=batch_size,
-                                      sample_size=None,
+                                      sample_size=100,
                                       datadir=datadir)
 
     (train_loader,
      valid_loader) = prepare_dataloaders(dataset_split='train',
                                          batch_size=batch_size,
-                                         sample_size=1000,
+                                         sample_size=100,
                                          datadir=datadir)
 
     # Define model architecture
