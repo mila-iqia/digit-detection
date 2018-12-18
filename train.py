@@ -122,22 +122,33 @@ def train_model(model, train_loader, valid_loader, device,
         print('Best model saved to :', model_filename)
 
 
-def prepare_dataloaders(batch_size=32, sample_size=None, train_datadir=None):
+def prepare_dataloaders(batch_size=32,
+                        datadir=None,
+                        dataset_split=None,
+                        sample_size=None,
+                        valid_split=0.8):
+    '''
+    dataset_split (str) : Any of 'train', 'extra', 'test'
 
+    valid_split (float) : Returns a validation split of %size
+    valid_split*100, should be in range [0,1]
+
+    sample_size (int) : Number of elements to use as sample size,
+    for debugging purposes only.
+
+    '''
+
+    assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
     train_metadir = 'data/SVHN/'
-    filename = 'train_metadata'
-    metadata_train = load_obj(train_metadir, filename)
-
-    #  extradata_dir = 'data/SVHN/extra/'
-    #  metadata_extra = load_obj(extradata_dir, filename)
-    filename = 'extra_metadata'
+    filename = dataset_split + '_metadata'
+    metadata = load_obj(train_metadir, filename)
+    datadir = datadir + '/' + dataset_split
 
     firstcrop = FirstCrop(0.3)
     rescale = Rescale((64, 64))
     random_crop = RandomCrop((54, 54))
     to_tensor = ToTensor()
 
-    #  train_datadir = 'data/SVHN/train/'
     # Declare transformations
 
     transform = transforms.Compose([firstcrop,
@@ -145,55 +156,66 @@ def prepare_dataloaders(batch_size=32, sample_size=None, train_datadir=None):
                                     random_crop,
                                     to_tensor])
 
-    dataset = SVHNDataset(metadata_train,
-                          data_dir=train_datadir,
+    dataset = SVHNDataset(metadata,
+                          data_dir=datadir,
                           transform=transform)
 
-    indices = np.arange(len(metadata_train))
+    indices = np.arange(len(metadata))
     indices = np.random.permutation(indices)
 
+    # Only use a sample amount of data
     if sample_size:
-        assert sample_size < len(dataset)/2, "Sample size is too big"
-        train_idx = indices[:sample_size]
-        valid_idx = indices[sample_size:2*sample_size]
+        indices = indices[:sample_size]
 
-    else:
+    if dataset_split in ['train', 'extra']:
 
-        train_idx = indices[:round(0.8*len(indices))]
-        valid_idx = indices[round(0.8*len(indices)):]
+        train_idx = indices[:round(valid_split*len(indices))]
+        valid_idx = indices[round(valid_split*len(indices)):]
 
-    train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
-    valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
+        train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
+        valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
 
-    # Prepare dataloaders
-    train_loader = DataLoader(dataset,
-                              batch_size=batch_size,
-                              shuffle=False,
-                              num_workers=4,
-                              sampler=train_sampler)
+        # Prepare a train and validation dataloader
+        train_loader = DataLoader(dataset,
+                                  batch_size=batch_size,
+                                  shuffle=False,
+                                  num_workers=4,
+                                  sampler=train_sampler)
 
-    valid_loader = DataLoader(dataset,
-                              batch_size=batch_size,
-                              shuffle=False,
-                              num_workers=4,
-                              sampler=valid_sampler)
+        valid_loader = DataLoader(dataset,
+                                  batch_size=batch_size,
+                                  shuffle=False,
+                                  num_workers=4,
+                                  sampler=valid_sampler)
 
-    return train_loader, valid_loader
+        return train_loader, valid_loader
+
+    elif dataset_split in ['test']:
+
+        # Prepare a test dataloader
+        test_loader = DataLoader(dataset,
+                                 batch_size=batch_size,
+                                 num_workers=4)
+
+        return test_loader
 
 
 if __name__ == "__main__":
 
     # CHANGE TO --args from python command
-    results_dir = os.environ['TMP_RESULTS_DIR']
+    #  results_dir = os.environ['TMP_RESULTS_DIR']
+    results_dir = 'results'
     batch_size = 32
-    num_epochs = 15
+    num_epochs = 5
 
     # CHANGE TO --args from python command
-    train_datadir = os.environ['TMP_DATA_DIR']+'/train'
+    #  train_datadir = os.environ['TMP_DATA_DIR']+'/train'
+    datadir = 'data/SVHN'
     (train_loader,
      valid_loader) = prepare_dataloaders(batch_size,
-                                         sample_size=None,
-                                         train_datadir=train_datadir)
+                                         dataset_split='train',
+                                         sample_size=100,
+                                         datadir=datadir)
 
     # Define model architecture
     baseline_cnn = BaselineCNN()
@@ -208,4 +230,4 @@ if __name__ == "__main__":
                 valid_loader=valid_loader,
                 num_epochs=num_epochs,
                 device=device,
-                model_filename=model_filename)
+                model_filename=None)
