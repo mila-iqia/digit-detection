@@ -2,15 +2,9 @@ import os
 import copy
 import time
 
-import numpy as np
 import torch
 
-from torchvision import transforms
-from torch.utils.data import DataLoader
-
-from utils.dataloader import SVHNDataset
-from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
-from utils.misc import load_obj
+from utils.dataloader import prepare_dataloaders
 from models.models import BaselineCNN
 
 
@@ -18,7 +12,7 @@ def train_model(model, train_loader, valid_loader, device,
                 num_epochs=10, lr=0.001, model_filename=None):
 
     since = time.time()
-    model.to(device)
+    model = model.to(device)
     train_loss_history = []
     valid_loss_history = []
     valid_accuracy_history = []
@@ -33,7 +27,7 @@ def train_model(model, train_loader, valid_loader, device,
         train_n_iter = 0
 
         # Set model to train mode
-        model.train()
+        model = model.train()
 
         # Iterate over train data
         for i, batch in enumerate(train_loader):
@@ -69,7 +63,7 @@ def train_model(model, train_loader, valid_loader, device,
         valid_n_samples = 0
 
         # Set model to evaluate mode
-        model.eval()
+        model = model.eval()
 
         # Iterate over valid data
         # Iterate over train data
@@ -122,84 +116,6 @@ def train_model(model, train_loader, valid_loader, device,
         print('Best model saved to :', model_filename)
 
 
-def prepare_dataloaders(batch_size=32,
-                        datadir=None,
-                        dataset_split=None,
-                        sample_size=None,
-                        valid_split=0.8):
-    '''
-    dataset_split (str) : Any of 'train', 'extra', 'test'
-
-    valid_split (float) : Returns a validation split of %size
-    valid_split*100, should be in range [0,1]
-
-    sample_size (int) : Number of elements to use as sample size,
-    for debugging purposes only.
-
-    '''
-
-    assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
-    train_metadir = 'data/SVHN/'
-    filename = dataset_split + '_metadata'
-    metadata = load_obj(train_metadir, filename)
-    datadir = datadir + '/' + dataset_split
-
-    firstcrop = FirstCrop(0.3)
-    rescale = Rescale((64, 64))
-    random_crop = RandomCrop((54, 54))
-    to_tensor = ToTensor()
-
-    # Declare transformations
-
-    transform = transforms.Compose([firstcrop,
-                                    rescale,
-                                    random_crop,
-                                    to_tensor])
-
-    dataset = SVHNDataset(metadata,
-                          data_dir=datadir,
-                          transform=transform)
-
-    indices = np.arange(len(metadata))
-    indices = np.random.permutation(indices)
-
-    # Only use a sample amount of data
-    if sample_size:
-        indices = indices[:sample_size]
-
-    if dataset_split in ['train', 'extra']:
-
-        train_idx = indices[:round(valid_split*len(indices))]
-        valid_idx = indices[round(valid_split*len(indices)):]
-
-        train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
-        valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
-
-        # Prepare a train and validation dataloader
-        train_loader = DataLoader(dataset,
-                                  batch_size=batch_size,
-                                  shuffle=False,
-                                  num_workers=4,
-                                  sampler=train_sampler)
-
-        valid_loader = DataLoader(dataset,
-                                  batch_size=batch_size,
-                                  shuffle=False,
-                                  num_workers=4,
-                                  sampler=valid_sampler)
-
-        return train_loader, valid_loader
-
-    elif dataset_split in ['test']:
-
-        # Prepare a test dataloader
-        test_loader = DataLoader(dataset,
-                                 batch_size=batch_size,
-                                 num_workers=4)
-
-        return test_loader
-
-
 if __name__ == "__main__":
 
     # CHANGE TO --args from python command
@@ -212,8 +128,8 @@ if __name__ == "__main__":
     #  train_datadir = os.environ['TMP_DATA_DIR']+'/train'
     datadir = 'data/SVHN'
     (train_loader,
-     valid_loader) = prepare_dataloaders(batch_size,
-                                         dataset_split='train',
+     valid_loader) = prepare_dataloaders(dataset_split='train',
+                                         batch_size=batch_size,
                                          sample_size=100,
                                          datadir=datadir)
 
