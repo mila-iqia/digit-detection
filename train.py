@@ -1,15 +1,10 @@
+import os
 import copy
 import time
 
-import numpy as np
 import torch
 
-from torchvision import transforms
-from torch.utils.data import DataLoader
-
-from utils.dataloader import SVHNDataset
-from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
-from utils.misc import load_obj
+from utils.dataloader import prepare_dataloaders
 from models.models import BaselineCNN
 
 
@@ -17,7 +12,7 @@ def train_model(model, train_loader, valid_loader, device,
                 num_epochs=10, lr=0.001, model_filename=None):
 
     since = time.time()
-    model.to(device)
+    model = model.to(device)
     train_loss_history = []
     valid_loss_history = []
     valid_accuracy_history = []
@@ -32,7 +27,7 @@ def train_model(model, train_loader, valid_loader, device,
         train_n_iter = 0
 
         # Set model to train mode
-        model.train()
+        model = model.train()
 
         # Iterate over train data
         for i, batch in enumerate(train_loader):
@@ -42,7 +37,7 @@ def train_model(model, train_loader, valid_loader, device,
             inputs = inputs.to(device)
             target_ndigits = targets[:, 0].long()
 
-            target_ndigits.to(device)
+            target_ndigits = target_ndigits.to(device)
 
             # Zero the gradient buffer
             optimizer.zero_grad()
@@ -68,7 +63,7 @@ def train_model(model, train_loader, valid_loader, device,
         valid_n_samples = 0
 
         # Set model to evaluate mode
-        model.eval()
+        model = model.eval()
 
         # Iterate over valid data
         # Iterate over train data
@@ -79,7 +74,7 @@ def train_model(model, train_loader, valid_loader, device,
             inputs = inputs.to(device)
 
             target_ndigits = targets[:, 0].long()
-            target_ndigits.to(device)
+            target_ndigits = target_ndigits.to(device)
 
             # Forward
             outputs = model(inputs)
@@ -116,76 +111,27 @@ def train_model(model, train_loader, valid_loader, device,
     if model_filename:
         print('Saving model ...')
         timestr = time.strftime("_%Y%m%d_%H%M%S")
-        model_filename = 'models/' + model_filename + timestr + '.pth'
+        model_filename = model_filename + timestr + '.pth'
         torch.save(best_model, model_filename)
         print('Best model saved to :', model_filename)
 
 
-def prepare_dataloaders(batch_size=32, sample_size=None):
-
-    train_metadir = 'data/SVHN/'
-    filename = 'train_metadata'
-    metadata_train = load_obj(train_metadir, filename)
-
-    #  extradata_dir = 'data/SVHN/extra/'
-    #  metadata_extra = load_obj(extradata_dir, filename)
-    filename = 'extra_metadata'
-
-    firstcrop = FirstCrop(0.3)
-    rescale = Rescale((64, 64))
-    random_crop = RandomCrop((54, 54))
-    to_tensor = ToTensor()
-
-    # Declare transformations
-    train_datadir = 'data/SVHN/train/'
-
-    transform = transforms.Compose([firstcrop,
-                                    rescale,
-                                    random_crop,
-                                    to_tensor])
-
-    dataset = SVHNDataset(metadata_train,
-                          data_dir=train_datadir,
-                          transform=transform)
-
-    indices = np.arange(len(metadata_train))
-    indices = np.random.permutation(indices)
-
-    if sample_size:
-        assert sample_size < len(dataset)/2, "Sample size is too big"
-        train_idx = indices[:sample_size]
-        valid_idx = indices[sample_size:2*sample_size]
-
-    else:
-
-        train_idx = indices[:round(0.8*len(indices))]
-        valid_idx = indices[round(0.8*len(indices)):]
-
-    train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
-    valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
-
-    # Prepare dataloaders
-    train_loader = DataLoader(dataset,
-                              batch_size=batch_size,
-                              shuffle=False,
-                              num_workers=4,
-                              sampler=train_sampler)
-
-    valid_loader = DataLoader(dataset,
-                              batch_size=batch_size,
-                              shuffle=False,
-                              num_workers=4,
-                              sampler=valid_sampler)
-
-    return train_loader, valid_loader
-
-
 if __name__ == "__main__":
 
+    # CHANGE TO --args from python command
+    #  results_dir = os.environ['TMP_RESULTS_DIR']
+    results_dir = 'results'
     batch_size = 32
+    num_epochs = 5
 
-    train_loader, valid_loader = prepare_dataloaders(batch_size,
-                                                     sample_size=100)
+    # CHANGE TO --args from python command
+    #  train_datadir = os.environ['TMP_DATA_DIR']+'/train'
+    datadir = 'data/SVHN'
+    (train_loader,
+     valid_loader) = prepare_dataloaders(dataset_split='train',
+                                         batch_size=batch_size,
+                                         sample_size=100,
+                                         datadir=datadir)
 
     # Define model architecture
     baseline_cnn = BaselineCNN()
@@ -193,10 +139,11 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
-    model_filename = "my_model"
+    model_filename = results_dir + "/my_model"
 
     train_model(baseline_cnn,
                 train_loader=train_loader,
                 valid_loader=valid_loader,
+                num_epochs=num_epochs,
                 device=device,
                 model_filename=None)

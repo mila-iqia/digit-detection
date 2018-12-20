@@ -132,7 +132,7 @@ class ToTensor(object):
         image = image - np.mean(image)
         assert image.shape == (54, 54, 3)
 
-        # swap color axis because
+        # swap color axis
         # numpy image: H x W x C
         # torch image: C X H X W
         image = image.transpose((2, 0, 1))
@@ -143,13 +143,18 @@ class ToTensor(object):
 
         labels = np.asarray(labels)
 
-        # Target is a 1x6 vector, where [0] is the number of digits and
+        # target is a 1x6 vector, where [0] is the number of digits and
         # targets[1:targets[0]] is the digit sequence.
         # i.e. the sequence 157 is represented by target [3,1,5,5,7,-1,-1]
         target = -np.ones(6)
-        target[0] = len(labels)
 
-        for jj in range(len(labels)):
+        # First element of target is the number of digits in the image
+        # A Target of 6 represents >5 digits in the image, i.e. we have
+        # 7 classes. Refer to paper for more details.
+        target[0] = min(len(labels), 6)
+
+        # Here we identify at most 5 digits
+        for jj in range(min(len(labels), 5)):
 
             target[jj+1] = labels[jj]
 

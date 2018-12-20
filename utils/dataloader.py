@@ -3,6 +3,14 @@ import os
 from PIL import Image
 from torch.utils import data
 
+import numpy as np
+import torch
+
+from torchvision import transforms
+from torch.utils.data import DataLoader
+
+from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
+from utils.misc import load_obj
 from utils.boxes import extract_labels_boxes
 
 
@@ -57,3 +65,83 @@ class SVHNDataset(data.Dataset):
             sample = self.transform(sample)
 
         return sample
+
+
+def prepare_dataloaders(dataset_split,
+                        batch_size=32,
+                        datadir=None,
+                        sample_size=None,
+                        valid_split=0.8):
+    '''
+    dataset_split (str) : Any of 'train', 'extra', 'test'
+
+    valid_split (float) : Returns a validation split of %size
+    valid_split*100, should be in range [0,1]
+
+    sample_size (int) : Number of elements to use as sample size,
+    for debugging purposes only.
+
+    '''
+
+    assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
+    train_metadir = 'data/SVHN/'
+    filename = dataset_split + '_metadata'
+    metadata = load_obj(train_metadir, filename)
+    datadir = datadir + '/' + dataset_split
+
+    firstcrop = FirstCrop(0.3)
+    rescale = Rescale((64, 64))
+    random_crop = RandomCrop((54, 54))
+    to_tensor = ToTensor()
+
+    # Declare transformations
+
+    transform = transforms.Compose([firstcrop,
+                                    rescale,
+                                    random_crop,
+                                    to_tensor])
+
+    dataset = SVHNDataset(metadata,
+                          data_dir=datadir,
+                          transform=transform)
+
+    indices = np.arange(len(metadata))
+    indices = np.random.permutation(indices)
+
+    # Only use a sample amount of data
+    if sample_size:
+        indices = indices[:sample_size]
+
+    if dataset_split in ['train', 'extra']:
+
+        train_idx = indices[:round(valid_split*len(indices))]
+        valid_idx = indices[round(valid_split*len(indices)):]
+
+        train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
+        valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
+
+        # Prepare a train and validation dataloader
+        train_loader = DataLoader(dataset,
+                                  batch_size=batch_size,
+                                  shuffle=False,
+                                  num_workers=4,
+                                  sampler=train_sampler)
+
+        valid_loader = DataLoader(dataset,
+                                  batch_size=batch_size,
+                                  shuffle=False,
+                                  num_workers=4,
+                                  sampler=valid_sampler)
+
+        return train_loader, valid_loader
+
+    elif dataset_split in ['test']:
+
+        test_sampler = torch.utils.data.SubsetRandomSampler(indices)
+        # Prepare a test dataloader
+        test_loader = DataLoader(dataset,
+                                 batch_size=batch_size,
+                                 num_workers=4,
+                                 sampler=test_sampler)
+
+        return test_loader
