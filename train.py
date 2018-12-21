@@ -1,4 +1,5 @@
 import os
+import argparse
 import copy
 import time
 
@@ -118,19 +119,32 @@ def train_model(model, train_loader, valid_loader, device,
 
 if __name__ == "__main__":
 
-    # CHANGE TO --args from python command
-    #  results_dir = os.environ['TMP_RESULTS_DIR']
-    results_dir = 'results'
-    batch_size = 32
-    num_epochs = 5
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", type=str, default='data/SVHN')
+    parser.add_argument("--results_dir", type=str, default='results')
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--num_epochs", type=int, default=10)
+    parser.add_argument("--sample_size", type=int, default=None)
+    parser.add_argument("--model_filename", type=str, default=None)
+    parser.add_argument("--dataset_split", type=str, default='train')
 
-    # CHANGE TO --args from python command
-    #  train_datadir = os.environ['TMP_DATA_DIR']+'/train'
-    datadir = 'data/SVHN'
+    args = parser.parse_args()
+    datadir = args.data_dir
+    results_dir = args.results_dir
+    batch_size = args.batch_size
+    num_epochs = args.num_epochs
+    sample_size = args.sample_size
+    model_filename = args.model_filename
+    dataset_split = args.dataset_split
+
+    #  sample_size = None
+    if model_filename:
+        model_filename = results_dir + '/' + model_filename
+
     (train_loader,
-     valid_loader) = prepare_dataloaders(dataset_split='train',
+     valid_loader) = prepare_dataloaders(dataset_split=dataset_split,
                                          batch_size=batch_size,
-                                         sample_size=100,
+                                         sample_size=sample_size,
                                          datadir=datadir)
 
     # Define model architecture
@@ -139,11 +153,9 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
-    model_filename = results_dir + "/my_model"
-
     train_model(baseline_cnn,
                 train_loader=train_loader,
                 valid_loader=valid_loader,
                 num_epochs=num_epochs,
                 device=device,
-                model_filename=None)
+                model_filename=model_filename)
