@@ -8,7 +8,7 @@ We recommend you use [conda](https://conda.io/docs/) to manage your environments
 
 `conda env create -f environment.yml`
 
-For more information on how to manage different environments, consult the [conda documentation](https://conda.io/docs/user-guide/tasks/manage-environments.html) 
+This will create a new conda environment with the libraries used for this project (i.e. pytorch, torchvision, etc.) called `digit-detection`. For more information on how to manage different environments, consult the [conda documentation](https://conda.io/docs/user-guide/tasks/manage-environments.html) 
 
 ## Run Locally
 
@@ -21,11 +21,11 @@ chmod +x local_setup.sh
 ./local_setup.sh
 ```
 
-To run your code locally, activate your conda environment:
+To run your code locally, activate your conda environment. Make sure you have already created the conda environment from the `environment.yml` file. See the `Dependencies` section for more info.
 
-`conda env create -f environment.yml`
+`conda activate digit-detection`
 
-then run the provided `train.py` file.
+then run the provided `train.py` file:
 
 `python train.py`
 
