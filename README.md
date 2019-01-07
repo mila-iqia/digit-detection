@@ -4,13 +4,32 @@ This repo contains the code necessary for the Humanware project.
 
 ## Dependencies
 
-Use conda to manage your environments. You can start with a preconfigured environment by using the provided `environment.yml` file.
+We recommend you use [conda](https://conda.io/docs/) to manage your environments. You can start with a preconfigured environment by using the provided `environment.yml` file:
+
+`conda env create -f environment.yml`
+
+For more information on how to manage different environments, consult the [conda documentation](https://conda.io/docs/user-guide/tasks/manage-environments.html) 
 
 ## Run Locally
 
-To run your code locally, activate your conda environment, then run the provided `train.py` file.
+### Get the data
 
-## Cluster
+To get the data, run the `local_setup.sh` script which will download the data to the appropriate directories. Make sure the file is executable:
+
+```
+chmod +x local_setup.sh
+./local_setup.sh
+```
+
+To run your code locally, activate your conda environment:
+
+`conda env create -f environment.yml`
+
+then run the provided `train.py` file.
+
+`python train.py`
+
+## Run on the cluster
 
 To run the code on the cluster, use the `train_on_slurm.sh` file. That script will:
 - Copy your data to the proper directories
@@ -18,6 +37,10 @@ To run the code on the cluster, use the `train_on_slurm.sh` file. That script wi
 - Save models
 - Clean up your data
 
+## Data
+
 For more information about the data used and its format, consult the `README` in the `data/` directory.
+
+## Testing and model evaluation
 
 To evaluate your model, use the provided `test.py` file.
