@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export DATA_DIR='/rap/jvb-000-aa/COURS2019/etudiants/data/humanware/SVHN'
-export TMP_DATA_DIR=$SCRATCH$USER'data/SVHN'
+export TMP_DATA_DIR=$SCRATCH$USER'/data/SVHN'
 export TMP_RESULTS_DIR=$SCRATCH$USER'/results'
 export ROOT_DIR=$HOME'/digit-detection'
 
@@ -33,6 +33,6 @@ echo "Copying files to local hard drive..."
 mkdir -p $ROOT_DIR
 cp -r $TMP_RESULTS_DIR $ROOT_DIR
 
-echo "Cleaning up data..."
-rm -r $TMP_DATA_DIR
-rm -r $TMP_RESULTS_DIR
+# echo "Cleaning up data..."
+# rm -r $TMP_DATA_DIR
+# rm -r $TMP_RESULTS_DIR
