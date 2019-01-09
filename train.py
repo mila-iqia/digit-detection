@@ -102,6 +102,7 @@ def train_model(model, train_loader, valid_loader, device,
             valid_best_accuracy = valid_accuracy
             best_model = copy.deepcopy(model)
             print('Checkpointing new model...')
+            torch.save(model, 'results/checkpoint.pth')
         valid_accuracy_history.append(valid_accuracy)
 
     time_elapsed = time.time() - since
