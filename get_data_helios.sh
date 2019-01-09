@@ -9,13 +9,3 @@ if [ ! -f $DATA_DIR'/train.tar.gz' ]; then
     wget -P $DATA_DIR http://ufldl.stanford.edu/housenumbers/train.tar.gz
 fi
 
-# Extract data
-if [ ! -d $DATA_DIR/train ]; then
-
-    echo "Extracting Files to " $DATA_DIR
-    tar -xzf $DATA_DIR/train.tar.gz -C $DATA_DIR
-    echo "Extraction finished!"
-
-else
-    echo "Train files already present"
-fi
