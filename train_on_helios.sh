@@ -14,6 +14,8 @@ if [ ! -f $DATA_DIR'/train.tar.gz' ]; then
     wget -P $DATA_DIR http://ufldl.stanford.edu/housenumbers/train.tar.gz
 fi
 
+cp $DATA_DIR/train_metadata.pkl $TMP_DATA_DIR
+
 if [ ! -d $TMP_DATA_DIR/train ]; then
 
     echo "Extracting Files to " $TMP_DATA_DIR
