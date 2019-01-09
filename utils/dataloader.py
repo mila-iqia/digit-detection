@@ -84,7 +84,7 @@ def prepare_dataloaders(dataset_split,
     '''
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
-    filename = dataset_split + '_metadata'
+    filename = '/' + dataset_split + '_metadata'
     metadata = load_obj(datadir, filename)
     datadir = datadir + '/' + dataset_split
 
