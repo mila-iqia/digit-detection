@@ -84,9 +84,8 @@ def prepare_dataloaders(dataset_split,
     '''
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
-    train_metadir = 'data/SVHN/'
     filename = dataset_split + '_metadata'
-    metadata = load_obj(train_metadir, filename)
+    metadata = load_obj(datadir, filename)
     datadir = datadir + '/' + dataset_split
 
     firstcrop = FirstCrop(0.3)
