@@ -29,7 +29,7 @@ fi
 
 # conda env create -f $ROOT_DIR'/environment.yml'
 # source activate digit-detection
-python train.py
+python ~/digit-detection/train.py --data_dir=$TMP_DATA_DIR --model_filename="baseline" --batch_size=32
 
 echo "Copying files to local hard drive..."
 mkdir -p $ROOT_DIR
