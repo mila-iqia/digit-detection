@@ -3,6 +3,7 @@ import argparse
 import copy
 import time
 
+from tqdm import tqdm
 import torch
 
 from utils.dataloader import prepare_dataloaders
@@ -31,7 +32,10 @@ def train_model(model, train_loader, valid_loader, device,
         model = model.train()
 
         # Iterate over train data
-        for i, batch in enumerate(train_loader):
+
+        print("Batch processing training data...")
+        for i, batch in enumerate(tqdm(train_loader)):
+            
             # get the inputs
             inputs, targets = batch['image'], batch['target']
 
@@ -67,8 +71,8 @@ def train_model(model, train_loader, valid_loader, device,
         model = model.eval()
 
         # Iterate over valid data
-        # Iterate over train data
-        for i, batch in enumerate(valid_loader):
+        print("Batch processing training data...")
+        for i, batch in enumerate(tqdm(valid_loader)):
             # get the inputs
             inputs, targets = batch['image'], batch['target']
 
