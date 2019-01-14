@@ -1,4 +1,3 @@
-import os
 import argparse
 import copy
 import time
@@ -35,7 +34,7 @@ def train_model(model, train_loader, valid_loader, device,
 
         print("Batch processing training data...")
         for i, batch in enumerate(tqdm(train_loader)):
-            
+
             # get the inputs
             inputs, targets = batch['image'], batch['target']
 
