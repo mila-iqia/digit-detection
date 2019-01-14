@@ -23,6 +23,7 @@ class FirstCrop(object):
         image = sample['image']
         labels = sample['metadata']['labels']
         boxes = sample['metadata']['boxes']
+        filename = sample['metadata']['filename']
 
         outer_box = extract_outer_box(sample, padding=self.pad_size)
         outer_box = np.round(outer_box).astype('int')
@@ -35,7 +36,9 @@ class FirstCrop(object):
 
         img_cropped = image.crop((x1_tot, y1_tot, x2_tot, y2_tot))
 
-        metadata = {'boxes': boxes_cropped, 'labels': labels}
+        metadata = {'boxes': boxes_cropped,
+                    'labels': labels,
+                    'filename': filename}
 
         return {'image': img_cropped, 'metadata': metadata}
 
@@ -57,6 +60,7 @@ class Rescale(object):
         image = sample['image']
         boxes = sample['metadata']['boxes']
         labels = sample['metadata']['labels']
+        filename = sample['metadata']['filename']
 
         h, w = np.asarray(image).shape[:2]
 
@@ -74,7 +78,9 @@ class Rescale(object):
         boxes[:, 2:] *= (new_h / h)
         boxes = boxes.astype('int64')
 
-        metadata = {'boxes': boxes, 'labels': labels}
+        metadata = {'boxes': boxes,
+                    'labels': labels,
+                    'filename': filename}
 
         return {'image': image_scaled, 'metadata': metadata}
 
@@ -100,6 +106,7 @@ class RandomCrop(object):
         image = sample['image']
         labels = sample['metadata']['labels']
         boxes = sample['metadata']['boxes']
+        filename = sample['metadata']['filename']
 
         h, w = np.asarray(image).shape[:2]
         new_h, new_w = self.output_size
@@ -115,7 +122,9 @@ class RandomCrop(object):
         boxes[:, :2] = np.clip(boxes[:, :2], 0, new_w-1)
         boxes[:, 2:] = np.clip(boxes[:, 2:], 0, new_h-1)
 
-        metadata = {'boxes': boxes, 'labels': labels}
+        metadata = {'boxes': boxes,
+                    'labels': labels,
+                    'filename': filename}
 
         return {'image': image_cropped, 'metadata': metadata}
 
@@ -127,6 +136,8 @@ class ToTensor(object):
 
         image = sample['image']
         labels = sample['metadata']['labels']
+        # boxes = sample['metadata']['boxes']
+        filename = sample['metadata']['filename']
 
         image = np.asarray(image)
         image = image - np.mean(image)
@@ -159,7 +170,7 @@ class ToTensor(object):
             target[jj+1] = labels[jj]
 
         target = torch.from_numpy(target).int()
-#         metadata = {'boxes': boxes, 'labels': labels}
 
         return {'image': image,
-                'target': target}
+                'target': target,
+                'filename': filename}

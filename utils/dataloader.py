@@ -57,7 +57,7 @@ class SVHNDataset(data.Dataset):
 
         labels, boxes = extract_labels_boxes(metadata_raw)
 
-        metadata = {'labels': labels, 'boxes': boxes}
+        metadata = {'labels': labels, 'boxes': boxes, 'filename': img_name}
 
         sample = {'image': image, 'metadata': metadata}
 
