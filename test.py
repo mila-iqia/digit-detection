@@ -1,4 +1,5 @@
-import os
+import argparse
+from tqdm import tqdm
 import time
 
 import torch
@@ -20,7 +21,7 @@ def test_model(model, test_loader, device,
     test_n_samples = 0
     y_true = []
     y_pred = []
-    for i, batch in enumerate(test_loader):
+    for i, batch in enumerate(tqdm(test_loader)):
         # get the inputs
         inputs, targets = batch['image'], batch['target']
 
@@ -62,17 +63,25 @@ def test_model(model, test_loader, device,
 
 if __name__ == "__main__":
 
-    # CHANGE TO --args from python command
-    #  results_dir = os.environ['TMP_RESULTS_DIR']
-    results_dir = 'results'
-    batch_size = 32
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", type=str, default='data/SVHN')
+    parser.add_argument("--results_dir", type=str, default='results')
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--sample_size", type=int, default=None)
+    parser.add_argument("--dataset_split", type=str, default='test')
+    parser.add_argument("--model_filename", type=str)
 
-    # CHANGE TO --args from python command
-    #  train_datadir = os.environ['TMP_DATA_DIR']+'/train'
-    datadir = 'data/SVHN'
-    test_loader = prepare_dataloaders(dataset_split='test',
+    args = parser.parse_args()
+    batch_size = args.batch_size
+    datadir = args.data_dir
+    sample_size = args.sample_size
+    results_dir = args.results_dir
+    dataset_split = args.dataset_split
+    model_filename = args.model_filename
+
+    test_loader = prepare_dataloaders(dataset_split=dataset_split,
                                       batch_size=batch_size,
-                                      sample_size=100,
+                                      sample_size=sample_size,
                                       datadir=datadir)
 
     (train_loader,
@@ -86,10 +95,6 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
-    #  model_filename = 'models/my_model_20181128_151805.pth'
-    model_filename = 'results/my_model_20181211_144802.pth'
-    #  model_filename = 'results/my_model_20181214_140235.pth'
-    #  model_filename = results_dir + "/my_model"
     model = torch.load(model_filename, map_location=device)
 
     test_model(model,
