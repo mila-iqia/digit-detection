@@ -1,4 +1,6 @@
 import os
+from pathlib import Path
+
 
 from PIL import Image
 from torch.utils import data
@@ -10,7 +12,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 
 from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
-from utils.misc import load_obj
+from utils.utils import load_obj
 from utils.boxes import extract_labels_boxes
 
 
@@ -84,9 +86,14 @@ def prepare_dataloaders(dataset_split,
     '''
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
-    filename = '/' + dataset_split + '_metadata'
-    metadata = load_obj(datadir, filename)
-    datadir = datadir + '/' + dataset_split
+
+    datadir = Path(datadir)
+
+    metadata_filename = datadir / (dataset_split + '_metadata.pkl')
+
+    metadata = load_obj(metadata_filename)
+
+    dataset_path = datadir / dataset_split
 
     firstcrop = FirstCrop(0.3)
     rescale = Rescale((64, 64))
@@ -101,7 +108,7 @@ def prepare_dataloaders(dataset_split,
                                     to_tensor])
 
     dataset = SVHNDataset(metadata,
-                          data_dir=datadir,
+                          data_dir=dataset_path,
                           transform=transform)
 
     indices = np.arange(len(metadata))

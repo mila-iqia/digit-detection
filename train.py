@@ -1,6 +1,7 @@
 import argparse
 import copy
 import time
+from pathlib import Path
 
 from tqdm import tqdm
 import torch
@@ -10,7 +11,8 @@ from models.models import BaselineCNN
 
 
 def train_model(model, train_loader, valid_loader, device,
-                num_epochs=10, lr=0.001, model_filename=None):
+                num_epochs=10, lr=0.001,
+                model_filename=None, results_dir='results/'):
 
     since = time.time()
     model = model.to(device)
@@ -105,7 +107,9 @@ def train_model(model, train_loader, valid_loader, device,
             valid_best_accuracy = valid_accuracy
             best_model = copy.deepcopy(model)
             print('Checkpointing new model...')
-            torch.save(model, 'results/checkpoint.pth')
+            results_dir = Path(results_dir)
+            checkpoint_fname = results_dir / 'checkpoint.pth'
+            torch.save(model, checkpoint_fname)
         valid_accuracy_history.append(valid_accuracy)
 
     time_elapsed = time.time() - since
@@ -114,18 +118,18 @@ def train_model(model, train_loader, valid_loader, device,
         time_elapsed // 60, time_elapsed % 60))
 
     if model_filename:
-        print('Saving model ...')
+        print('Saving best model ...')
         timestr = time.strftime("_%Y%m%d_%H%M%S")
-        model_filename = model_filename + timestr + '.pth'
-        torch.save(best_model, model_filename)
-        print('Best model saved to :', model_filename)
+        best_model_fname = results_dir / (model_filename + timestr + '.pth')
+        torch.save(best_model, best_model_fname)
+        print('Best model saved to :', best_model_fname)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default='data/SVHN')
-    parser.add_argument("--results_dir", type=str, default='results')
+    parser.add_argument("--results_dir", type=str, default='results/')
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--num_epochs", type=int, default=10)
     parser.add_argument("--sample_size", type=int, default=None)
@@ -162,4 +166,5 @@ if __name__ == "__main__":
                 valid_loader=valid_loader,
                 num_epochs=num_epochs,
                 device=device,
-                model_filename=model_filename)
+                model_filename=model_filename,
+                results_dir=results_dir)

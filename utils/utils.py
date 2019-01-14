@@ -60,13 +60,13 @@ def aggregate_data(index, hdf5_data):
     return metadata
 
 
-def save_obj(obj, data_dir, filename):
-    with open(data_dir + filename + '.pkl', 'wb') as f:
+def save_obj(obj, filename):
+    with open(filename, 'wb') as f:
         pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
 
 
-def load_obj(data_dir, filename):
-    with open(data_dir + filename + '.pkl', 'rb') as f:
+def load_obj(filename):
+    with open(filename, 'rb') as f:
         return pickle.load(f)
 
 
