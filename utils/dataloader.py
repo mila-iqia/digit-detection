@@ -12,7 +12,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 
 from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
-from utils.utils import load_obj
+from utils.misc import load_obj
 from utils.boxes import extract_labels_boxes
 
 
