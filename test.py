@@ -1,14 +1,16 @@
 import argparse
-from tqdm import tqdm
+from pathlib import Path
 import time
 
+from tqdm import tqdm
+import numpy as np
 import torch
 
 from utils.dataloader import prepare_dataloaders
 
 
-def test_model(model, test_loader, device,
-               ):
+def test_model(model, test_loader, device, results_dir='results/'):
+
     since = time.time()
     model = model.to(device)
     model = model.eval()
@@ -60,12 +62,19 @@ def test_model(model, test_loader, device,
     print('\n\nTesting complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
 
+    # Save prediction to .txt file
+    results_pred_fname = Path(results_dir) / 'test_pred_output.txt'
+    np.savetxt(results_pred_fname, y_pred, fmt='%.1f')
+
+    results_gt_fname = Path(results_dir) / 'test_gt_output.txt'
+    np.savetxt(results_gt_fname, y_true, fmt='%.1f')
+
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default='data/SVHN')
-    parser.add_argument("--results_dir", type=str, default='results')
+    parser.add_argument("--results_dir", type=str, default='results/')
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--sample_size", type=int, default=None)
     parser.add_argument("--dataset_split", type=str, default='test')
@@ -84,17 +93,10 @@ if __name__ == "__main__":
                                       sample_size=sample_size,
                                       datadir=datadir)
 
-    (train_loader,
-     valid_loader) = prepare_dataloaders(dataset_split='train',
-                                         batch_size=batch_size,
-                                         sample_size=100,
-                                         datadir=datadir)
-
-    # Define model architecture
-
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
+    # Load best model
     model = torch.load(model_filename, map_location=device)
 
     test_model(model,

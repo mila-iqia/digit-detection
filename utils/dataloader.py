@@ -112,7 +112,7 @@ def prepare_dataloaders(dataset_split,
                           transform=transform)
 
     indices = np.arange(len(metadata))
-    indices = np.random.permutation(indices)
+    #  indices = np.random.permutation(indices)
 
     # Only use a sample amount of data
     if sample_size:
@@ -143,11 +143,13 @@ def prepare_dataloaders(dataset_split,
 
     elif dataset_split in ['test']:
 
-        test_sampler = torch.utils.data.SubsetRandomSampler(indices)
+        test_sampler = torch.utils.data.SequentialSampler(indices)
+
         # Prepare a test dataloader
         test_loader = DataLoader(dataset,
                                  batch_size=batch_size,
                                  num_workers=4,
+                                 shuffle=False,
                                  sampler=test_sampler)
 
         return test_loader

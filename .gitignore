@@ -1,4 +1,5 @@
-.ipynb_checkpoints
+*.ipynb
+*.ipynb_checkpoints
 
 *.pyc
 *.swp
@@ -10,3 +11,5 @@
 
 # Ignore pipfiles
 Pip*
+
+results/*
