@@ -1,5 +1,3 @@
-# Test
-
 # Data
 
 Data for the projet will be provided directly by the Mila team. It is based
