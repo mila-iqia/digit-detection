@@ -78,7 +78,8 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--sample_size", type=int, default=None)
     parser.add_argument("--dataset_split", type=str, default='test')
-    parser.add_argument("--model_filename", type=str)
+    parser.add_argument("--model_filename", type=str,
+                        default='results/my_model_20181211_144802.pth')
 
     args = parser.parse_args()
     batch_size = args.batch_size
@@ -88,7 +89,10 @@ if __name__ == "__main__":
     dataset_split = args.dataset_split
     model_filename = args.model_filename
 
+    metadata_filename = Path(datadir) / 'test_metadata.pkl'
+
     test_loader = prepare_dataloaders(dataset_split=dataset_split,
+                                      metadata_filename=metadata_filename,
                                       batch_size=batch_size,
                                       sample_size=sample_size,
                                       datadir=datadir)

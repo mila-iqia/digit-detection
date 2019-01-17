@@ -70,6 +70,7 @@ class SVHNDataset(data.Dataset):
 
 
 def prepare_dataloaders(dataset_split,
+                        metadata_filename,
                         batch_size=32,
                         datadir=None,
                         sample_size=None,

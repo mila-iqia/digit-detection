@@ -144,6 +144,7 @@ if __name__ == "__main__":
     sample_size = args.sample_size
     model_filename = args.model_filename
     dataset_split = args.dataset_split
+    metadata_filename = Path(datadir) / 'train_metadata.pkl'
 
     #  sample_size = None
     if model_filename:
@@ -151,6 +152,7 @@ if __name__ == "__main__":
 
     (train_loader,
      valid_loader) = prepare_dataloaders(dataset_split=dataset_split,
+                                         metadata_filename=metadata_filename,
                                          batch_size=batch_size,
                                          sample_size=sample_size,
                                          datadir=datadir)
