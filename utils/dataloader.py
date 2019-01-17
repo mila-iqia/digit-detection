@@ -70,13 +70,18 @@ class SVHNDataset(data.Dataset):
 
 
 def prepare_dataloaders(dataset_split,
+                        dataset_path,
                         metadata_filename,
                         batch_size=32,
-                        datadir=None,
                         sample_size=None,
                         valid_split=0.8):
     '''
     dataset_split (str) : Any of 'train', 'extra', 'test'
+
+    metadata_filename (str) : Absolute path to the metadata pickle file
+
+    dataset_path (str) : Absolute path to the dataset
+        (i.e. .../data/SVHN/train')
 
     valid_split (float) : Returns a validation split of %size
     valid_split*100, should be in range [0,1]
@@ -88,13 +93,9 @@ def prepare_dataloaders(dataset_split,
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
 
-    datadir = Path(datadir)
-
-    metadata_filename = datadir / (dataset_split + '_metadata.pkl')
-
     metadata = load_obj(metadata_filename)
 
-    dataset_path = datadir / dataset_split
+    #  dataset_path = datadir / dataset_split
 
     firstcrop = FirstCrop(0.3)
     rescale = Rescale((64, 64))

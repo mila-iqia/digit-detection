@@ -128,7 +128,7 @@ def train_model(model, train_loader, valid_loader, device,
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default='data/SVHN')
+    parser.add_argument("--SVHN_dir", type=str, default='data/SVHN')
     parser.add_argument("--results_dir", type=str, default='results/')
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--num_epochs", type=int, default=10)
@@ -137,14 +137,16 @@ if __name__ == "__main__":
     parser.add_argument("--dataset_split", type=str, default='train')
 
     args = parser.parse_args()
-    datadir = args.data_dir
+    SVHN_dir = args.SVHN_dir
     results_dir = args.results_dir
     batch_size = args.batch_size
     num_epochs = args.num_epochs
     sample_size = args.sample_size
     model_filename = args.model_filename
     dataset_split = args.dataset_split
-    metadata_filename = Path(datadir) / 'train_metadata.pkl'
+
+    metadata_filename = Path(SVHN_dir) / 'train_metadata.pkl'
+    dataset_path = Path(SVHN_dir) / 'train'
 
     #  sample_size = None
     if model_filename:
@@ -152,10 +154,10 @@ if __name__ == "__main__":
 
     (train_loader,
      valid_loader) = prepare_dataloaders(dataset_split=dataset_split,
+                                         dataset_path=dataset_path,
                                          metadata_filename=metadata_filename,
                                          batch_size=batch_size,
-                                         sample_size=sample_size,
-                                         datadir=datadir)
+                                         sample_size=sample_size)
 
     # Define model architecture
     baseline_cnn = BaselineCNN()

@@ -9,7 +9,7 @@ import torch
 from utils.dataloader import prepare_dataloaders
 
 
-def test_model(model, test_loader, device, results_dir='results/'):
+def test_model(model, test_loader, device):
 
     since = time.time()
     model = model.to(device)
@@ -62,18 +62,16 @@ def test_model(model, test_loader, device, results_dir='results/'):
     print('\n\nTesting complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
 
-    # Save prediction to .txt file
-    results_pred_fname = Path(results_dir) / 'test_pred_output.txt'
-    np.savetxt(results_pred_fname, y_pred, fmt='%.1f')
+    return y_pred
 
-    results_gt_fname = Path(results_dir) / 'test_gt_output.txt'
-    np.savetxt(results_gt_fname, y_true, fmt='%.1f')
+    #  results_gt_fname = Path(results_dir) / 'test_gt_output.txt'
+    #  np.savetxt(results_gt_fname, y_true, fmt='%.1f')
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default='data/SVHN')
+    parser.add_argument("--SVHN_dir", type=str, default='data/SVHN')
     parser.add_argument("--results_dir", type=str, default='results/')
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--sample_size", type=int, default=None)
@@ -83,19 +81,20 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     batch_size = args.batch_size
-    datadir = args.data_dir
+    SVHN_dir = args.SVHN_dir
     sample_size = args.sample_size
     results_dir = args.results_dir
     dataset_split = args.dataset_split
     model_filename = args.model_filename
 
-    metadata_filename = Path(datadir) / 'test_metadata.pkl'
+    metadata_filename = Path(SVHN_dir) / 'test_metadata.pkl'
+    dataset_path = Path(SVHN_dir) / 'test'
 
     test_loader = prepare_dataloaders(dataset_split=dataset_split,
+                                      dataset_path=dataset_path,
                                       metadata_filename=metadata_filename,
                                       batch_size=batch_size,
-                                      sample_size=sample_size,
-                                      datadir=datadir)
+                                      sample_size=sample_size)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
@@ -103,6 +102,9 @@ if __name__ == "__main__":
     # Load best model
     model = torch.load(model_filename, map_location=device)
 
-    test_model(model,
-               test_loader=test_loader,
-               device=device)
+    y_pred = test_model(model,
+                        test_loader=test_loader,
+                        device=device)
+
+    results_pred_fname = Path(results_dir) / 'test_pred_output.txt'
+    np.savetxt(results_pred_fname, y_pred, fmt='%.1f')
