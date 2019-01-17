@@ -87,6 +87,9 @@ if __name__ == "__main__":
     dataset_split = args.dataset_split
     model_filename = args.model_filename
 
+    # Put your group name here
+    group_name = "b1phutN"
+
     metadata_filename = Path(SVHN_dir) / 'test_metadata.pkl'
     dataset_path = Path(SVHN_dir) / 'test'
 
@@ -106,5 +109,6 @@ if __name__ == "__main__":
                         test_loader=test_loader,
                         device=device)
 
-    results_pred_fname = Path(results_dir) / 'test_pred_output.txt'
-    np.savetxt(results_pred_fname, y_pred, fmt='%.1f')
+    results_fname = Path(results_dir) / (group_name + '_eval_pred.txt')
+    print('\nSaving results to ', results_fname.absolute())
+    np.savetxt(results_fname, y_pred, fmt='%.1f')
