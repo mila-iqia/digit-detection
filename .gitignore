@@ -8,6 +8,7 @@
 *.m
 *.tar.gz
 *.out
+*.txt
 
 # Ignore pipfiles
 Pip*
