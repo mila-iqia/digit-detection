@@ -1,4 +1,4 @@
-## Data
+# Data
 
 Data for the projet will be provided directly by the Mila team. It is based
 off of the original data found in [SVHN](http://ufldl.stanford.edu/housenumbers/).
