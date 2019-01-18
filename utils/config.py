@@ -16,11 +16,13 @@ __C.DATASET_NAME = 'SVHN'
 __C.SEED = 1234
 
 __C.DATA_DIR = 'data'
+__C.METADATA_FILENAME = 'train_metadata.pkl'
 __C.RESULTS_DIR = 'results'
 
 # Training options
 __C.TRAIN = edict()
 __C.TRAIN.DATASET_SPLIT = 'train'
+__C.TRAIN.VALID_SPLIT = 0.8
 __C.TRAIN.SAMPLE_SIZE = 100
 __C.TRAIN.BATCH_SIZE = 32
 __C.TRAIN.NUM_EPOCHS = 5

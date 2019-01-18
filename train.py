@@ -16,7 +16,7 @@ import torch
 
 from utils.config import (cfg, cfg_from_file)
 from utils.dataloader import prepare_dataloaders
-from utils.utils import mkdir_p
+from utils.misc import mkdir_p
 from models.models import BaselineCNN
 from trainer.trainer import train_model
 
@@ -49,7 +49,9 @@ if __name__ == '__main__':
 
     cfg.TIMESTAMP = timestamp
     cfg.INPUT_DIR = os.path.join(
-        cfg.DATA_DIR, cfg.DATASET_NAME)
+        cfg.DATA_DIR, cfg.DATASET_NAME, cfg.TRAIN.DATASET_SPLIT)
+    cfg.METADATA_FILENAME = os.path.join(
+        cfg.DATA_DIR, cfg.DATASET_NAME, cfg.METADATA_FILENAME)
     cfg.OUTPUT_DIR = os.path.join(
         cfg.RESULTS_DIR,
         '%s_%s_%s' % (cfg.DATASET_NAME, cfg.CONFIG_NAME, timestamp))
@@ -76,9 +78,11 @@ if __name__ == '__main__':
     # Prepare data
     (train_loader,
      valid_loader) = prepare_dataloaders(dataset_split=cfg.TRAIN.DATASET_SPLIT,
+                                         dataset_path=cfg.INPUT_DIR,
+                                         metadata_filename=cfg.METADATA_FILENAME,
                                          batch_size=cfg.TRAIN.BATCH_SIZE,
                                          sample_size=cfg.TRAIN.SAMPLE_SIZE,
-                                         datadir=cfg.INPUT_DIR)
+                                         valid_split=cfg.TRAIN.VALID_SPLIT)
 
     # Define model architecture
     baseline_cnn = BaselineCNN()
