@@ -1,4 +1,6 @@
-.ipynb_checkpoints
+*.DS_Store
+*.ipynb
+*.ipynb_checkpoints
 
 *.pyc
 *.swp
@@ -7,6 +9,10 @@
 *.m
 *.tar.gz
 *.out
+*.txt
 
 # Ignore pipfiles
 Pip*
+
+results/*
+data/*

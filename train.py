@@ -1,155 +1,84 @@
-import argparse
-import copy
-import time
+#!/usr/bin/env python
 
-from tqdm import tqdm
+from __future__ import print_function
+import os
+import sys
+
+import argparse
+import dateutil.tz
+import datetime
+import numpy
+import pprint
+import random
+from shutil import copyfile
+
 import torch
 
+from utils.config import (cfg, cfg_from_file)
 from utils.dataloader import prepare_dataloaders
+from utils.utils import mkdir_p
 from models.models import BaselineCNN
+from trainer.trainer import train_model
 
 
-def train_model(model, train_loader, valid_loader, device,
-                num_epochs=10, lr=0.001, model_filename=None):
-
-    since = time.time()
-    model = model.to(device)
-    train_loss_history = []
-    valid_loss_history = []
-    valid_accuracy_history = []
-    valid_best_accuracy = 0
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
-    loss_ndigits = torch.nn.CrossEntropyLoss()
-
-    print("# Start training #")
-    for epoch in range(num_epochs):
-
-        train_loss = 0
-        train_n_iter = 0
-
-        # Set model to train mode
-        model = model.train()
-
-        # Iterate over train data
-
-        print("Batch processing training data...")
-        for i, batch in enumerate(tqdm(train_loader)):
-
-            # get the inputs
-            inputs, targets = batch['image'], batch['target']
-
-            inputs = inputs.to(device)
-            target_ndigits = targets[:, 0].long()
-
-            target_ndigits = target_ndigits.to(device)
-
-            # Zero the gradient buffer
-            optimizer.zero_grad()
-
-            # Forward
-            outputs = model(inputs)
-
-            loss = loss_ndigits(outputs, target_ndigits)
-
-            # Backward
-            loss.backward()
-
-            # Optimize
-            optimizer.step()
-
-            # Statistics
-            train_loss += loss.item()
-            train_n_iter += 1
-
-        valid_loss = 0
-        valid_n_iter = 0
-        valid_correct = 0
-        valid_n_samples = 0
-
-        # Set model to evaluate mode
-        model = model.eval()
-
-        # Iterate over valid data
-        print("Batch processing training data...")
-        for i, batch in enumerate(tqdm(valid_loader)):
-            # get the inputs
-            inputs, targets = batch['image'], batch['target']
-
-            inputs = inputs.to(device)
-
-            target_ndigits = targets[:, 0].long()
-            target_ndigits = target_ndigits.to(device)
-
-            # Forward
-            outputs = model(inputs)
-
-            loss = loss_ndigits(outputs, target_ndigits)
-
-            # Statistics
-            valid_loss += loss.item()
-            valid_n_iter += 1
-            _, predicted = torch.max(outputs.data, 1)
-            valid_correct += (predicted == target_ndigits).sum().item()
-            valid_n_samples += target_ndigits.size(0)
-
-        train_loss_history.append(train_loss / train_n_iter)
-        valid_loss_history.append(valid_loss / valid_n_iter)
-        valid_accuracy = valid_correct / valid_n_samples
-
-        print('\nEpoch: {}/{}'.format(epoch + 1, num_epochs))
-        print('\tTrain Loss: {:.4f}'.format(train_loss / train_n_iter))
-        print('\tValid Loss: {:.4f}'.format(valid_loss / valid_n_iter))
-        print('\tValid Accuracy: {:.4f}'.format(valid_accuracy))
-
-        if valid_accuracy > valid_best_accuracy:
-            valid_best_accuracy = valid_accuracy
-            best_model = copy.deepcopy(model)
-            print('Checkpointing new model...')
-            torch.save(model, 'results/checkpoint.pth')
-        valid_accuracy_history.append(valid_accuracy)
-
-    time_elapsed = time.time() - since
-
-    print('\n\nTraining complete in {:.0f}m {:.0f}s'.format(
-        time_elapsed // 60, time_elapsed % 60))
-
-    if model_filename:
-        print('Saving model ...')
-        timestr = time.strftime("_%Y%m%d_%H%M%S")
-        model_filename = model_filename + timestr + '.pth'
-        torch.save(best_model, model_filename)
-        print('Best model saved to :', model_filename)
+dir_path = (os.path.abspath(os.path.join(os.path.realpath(__file__), './.')))
+sys.path.append(dir_path)
 
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default='data/SVHN')
-    parser.add_argument("--results_dir", type=str, default='results')
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--num_epochs", type=int, default=10)
-    parser.add_argument("--sample_size", type=int, default=None)
-    parser.add_argument("--model_filename", type=str, default=None)
-    parser.add_argument("--dataset_split", type=str, default='train')
-
+def parse_args():
+    parser = argparse.ArgumentParser(description='Train a CNN network')
+    parser.add_argument('--cfg', dest='cfg_file', type=str,
+                        default=None,
+                        help='optional config file')
     args = parser.parse_args()
-    datadir = args.data_dir
-    results_dir = args.results_dir
-    batch_size = args.batch_size
-    num_epochs = args.num_epochs
-    sample_size = args.sample_size
-    model_filename = args.model_filename
-    dataset_split = args.dataset_split
+    return args
 
-    #  sample_size = None
-    if model_filename:
-        model_filename = results_dir + '/' + model_filename
 
+if __name__ == '__main__':
+
+    # Load the config file
+    args = parse_args()
+
+    if args.cfg_file:
+        args.cfg_file = os.path.join('config', args.cfg_file)
+        cfg_from_file(args.cfg_file)
+
+    now = datetime.datetime.now(dateutil.tz.tzlocal())
+    timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
+    print('timestamp: {}'.format(timestamp))
+
+    cfg.TIMESTAMP = timestamp
+    cfg.INPUT_DIR = os.path.join(
+        cfg.DATA_DIR, cfg.DATASET_NAME)
+    cfg.OUTPUT_DIR = os.path.join(
+        cfg.RESULTS_DIR,
+        '%s_%s_%s' % (cfg.DATASET_NAME, cfg.CONFIG_NAME, timestamp))
+
+    mkdir_p(cfg.OUTPUT_DIR)
+
+    if args.cfg_file:
+        copyfile(args.cfg_file, os.path.join(cfg.OUTPUT_DIR, 'comfig.yml'))
+
+    print('Data dir: {}'.format(cfg.INPUT_DIR))
+    print('Output dir: {}'.format(cfg.OUTPUT_DIR))
+
+    print('Using config:')
+    pprint.pprint(cfg)
+
+    # make the results reproductible
+    print('pytorch/random seed: {}'.format(cfg.SEED))
+    random.seed(cfg.SEED)
+    numpy.random.seed(cfg.SEED)
+    torch.manual_seed(cfg.SEED)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(cfg.SEED)
+
+    # Prepare data
     (train_loader,
-     valid_loader) = prepare_dataloaders(dataset_split=dataset_split,
-                                         batch_size=batch_size,
-                                         sample_size=sample_size,
-                                         datadir=datadir)
+     valid_loader) = prepare_dataloaders(dataset_split=cfg.TRAIN.DATASET_SPLIT,
+                                         batch_size=cfg.TRAIN.BATCH_SIZE,
+                                         sample_size=cfg.TRAIN.SAMPLE_SIZE,
+                                         datadir=cfg.INPUT_DIR)
 
     # Define model architecture
     baseline_cnn = BaselineCNN()
@@ -160,6 +89,6 @@ if __name__ == "__main__":
     train_model(baseline_cnn,
                 train_loader=train_loader,
                 valid_loader=valid_loader,
-                num_epochs=num_epochs,
+                num_epochs=cfg.TRAIN.NUM_EPOCHS,
                 device=device,
-                model_filename=model_filename)
+                model_filename=cfg.OUTPUT_DIR)

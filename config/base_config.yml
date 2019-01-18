@@ -1,0 +1,16 @@
+CONFIG_NAME: 'BaselineCNN'
+DATASET_NAME: SVHN
+SEED: 1234
+
+DATA_DIR: 'data'  # path to data
+RESULTS_DIR: 'results'  # path to results
+
+
+# Hyperparameters related to model training
+TRAIN:
+  DATASET_SPLIT: 'train'
+  SAMPLE_SIZE: 100
+  BATCH_SIZE: 32
+  NUM_EPOCHS: 5
+  LR: 0.001
+  
