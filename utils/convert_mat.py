@@ -2,7 +2,6 @@
 Convert .mat file provided with SVHN dataset to python dict. Inspired by this
 thread:
 https://stackoverflow.com/questions/41176258/h5py-access-data-in-datasets-in-svhn
-
 Step 1:  Download SVHN data in to data/SVHN/train
 '''
 

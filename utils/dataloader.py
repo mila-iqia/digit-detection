@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 from pathlib import Path
 
@@ -39,14 +41,11 @@ class SVHNDataset(data.Dataset):
         ----------
         index : int
             The index of the dataset
-
         Returns
         -------
         X : PIL objet
-
         y : dict
             The metadata associated to the image in dict form.
-
         '''
         'Generates one sample of data'
 
@@ -77,18 +76,13 @@ def prepare_dataloaders(dataset_split,
                         valid_split=0.8):
     '''
     dataset_split (str) : Any of 'train', 'extra', 'test'
-
     metadata_filename (str) : Absolute path to the metadata pickle file
-
     dataset_path (str) : Absolute path to the dataset
         (i.e. .../data/SVHN/train')
-
     valid_split (float) : Returns a validation split of %size
     valid_split*100, should be in range [0,1]
-
     sample_size (int) : Number of elements to use as sample size,
     for debugging purposes only.
-
     '''
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"

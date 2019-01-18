@@ -1,27 +1,23 @@
+#!/usr/bin/env python
+
 import numpy as np
 
 
 def extract_labels_boxes(meta):
     '''
     Extract the labels and boxes from the raw metadata.
-
-
     Parameters
     ----------
     meta : dict
         The metadata is what is contained in the dict from the pickle files
         provided with the project in e.g. data/SVHN/train/labels.pkl.
-
-
     Returns
     -------
     labels : list
         Contains the integers of the digits present in the image
-
     boxes : list
         Contains the tuples (x1, x2, y1, y2) of coordinates of bounding boxes
         associated to each digit in labels
-
     '''
 
     N = len(meta['label'])  # Number of digits in image
