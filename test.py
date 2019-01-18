@@ -1,14 +1,16 @@
 import argparse
-from tqdm import tqdm
+from pathlib import Path
 import time
 
+from tqdm import tqdm
+import numpy as np
 import torch
 
 from utils.dataloader import prepare_dataloaders
 
 
-def test_model(model, test_loader, device,
-               ):
+def test_model(model, test_loader, device):
+
     since = time.time()
     model = model.to(device)
     model = model.eval()
@@ -60,43 +62,53 @@ def test_model(model, test_loader, device,
     print('\n\nTesting complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
 
+    return y_pred
+
+    #  results_gt_fname = Path(results_dir) / 'test_gt_output.txt'
+    #  np.savetxt(results_gt_fname, y_true, fmt='%.1f')
+
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default='data/SVHN')
-    parser.add_argument("--results_dir", type=str, default='results')
+    parser.add_argument("--SVHN_dir", type=str, default='data/SVHN')
+    parser.add_argument("--results_dir", type=str, default='results/')
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--sample_size", type=int, default=None)
     parser.add_argument("--dataset_split", type=str, default='test')
-    parser.add_argument("--model_filename", type=str)
+    parser.add_argument("--model_filename", type=str,
+                        default='results/my_model_20181211_144802.pth')
 
     args = parser.parse_args()
     batch_size = args.batch_size
-    datadir = args.data_dir
+    SVHN_dir = args.SVHN_dir
     sample_size = args.sample_size
     results_dir = args.results_dir
     dataset_split = args.dataset_split
     model_filename = args.model_filename
 
+    # Put your group name here
+    group_name = "b1phutN"
+
+    metadata_filename = Path(SVHN_dir) / 'test_metadata.pkl'
+    dataset_path = Path(SVHN_dir) / 'test'
+
     test_loader = prepare_dataloaders(dataset_split=dataset_split,
+                                      dataset_path=dataset_path,
+                                      metadata_filename=metadata_filename,
                                       batch_size=batch_size,
-                                      sample_size=sample_size,
-                                      datadir=datadir)
-
-    (train_loader,
-     valid_loader) = prepare_dataloaders(dataset_split='train',
-                                         batch_size=batch_size,
-                                         sample_size=100,
-                                         datadir=datadir)
-
-    # Define model architecture
+                                      sample_size=sample_size)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
+    # Load best model
     model = torch.load(model_filename, map_location=device)
 
-    test_model(model,
-               test_loader=test_loader,
-               device=device)
+    y_pred = test_model(model,
+                        test_loader=test_loader,
+                        device=device)
+
+    results_fname = Path(results_dir) / (group_name + '_eval_pred.txt')
+    print('\nSaving results to ', results_fname.absolute())
+    np.savetxt(results_fname, y_pred, fmt='%.1f')
