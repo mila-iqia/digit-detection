@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 '''
 Convert .mat file provided with SVHN dataset to python dict. Inspired by this
 thread:
