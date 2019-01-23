@@ -13,10 +13,6 @@ __C.CONFIG_NAME = 'BaselineCNN'
 __C.DATASET_NAME = 'SVHN'
 __C.SEED = 1234
 
-__C.DATA_DIR = 'data'
-__C.METADATA_FILENAME = 'train_metadata.pkl'
-__C.RESULTS_DIR = 'results'
-
 # Training options
 __C.TRAIN = edict()
 __C.TRAIN.DATASET_SPLIT = 'train'

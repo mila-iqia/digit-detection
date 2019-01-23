@@ -28,6 +28,19 @@ def parse_args():
     parser.add_argument('--cfg', dest='cfg_file', type=str,
                         default=None,
                         help='optional config file')
+
+    parser.add_argument("--metadata_filename", type=str, default='')
+    # metadata_filename will be the absolute path to the directory to be used for
+    # evaluation.
+
+    parser.add_argument("--dataset_dir", type=str, default='')
+    # dataset_dir will be the absolute path to the directory to be used for
+    # evaluation.
+
+    parser.add_argument("--results_dir", type=str, default='')
+    # results_dir will be the absolute path to a directory where the output of
+    # your inference will be saved.
+
     args = parser.parse_args()
     return args
 
@@ -44,12 +57,10 @@ def load_config():
     print('timestamp: {}'.format(timestamp))
 
     cfg.TIMESTAMP = timestamp
-    cfg.INPUT_DIR = os.path.join(
-        cfg.DATA_DIR, cfg.DATASET_NAME, cfg.TRAIN.DATASET_SPLIT)
-    cfg.METADATA_FILENAME = os.path.join(
-        cfg.DATA_DIR, cfg.DATASET_NAME, cfg.METADATA_FILENAME)
+    cfg.INPUT_DIR = args.dataset_dir
+    cfg.METADATA_FILENAME = args.metadata_filename
     cfg.OUTPUT_DIR = os.path.join(
-        cfg.RESULTS_DIR,
+        args.results_dir,
         '%s_%s_%s' % (cfg.DATASET_NAME, cfg.CONFIG_NAME, timestamp))
 
     mkdir_p(cfg.OUTPUT_DIR)
@@ -91,8 +102,8 @@ if __name__ == '__main__':
                                          valid_split=cfg.TRAIN.VALID_SPLIT)
 
     # Define model architecture
-    baseline_cnn = ConvNet(num_classes=7)
-    # baseline_cnn = BaselineCNN()
+    # baseline_cnn = ConvNet(num_classes=7)
+    baseline_cnn = BaselineCNN()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
