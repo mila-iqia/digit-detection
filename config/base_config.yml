@@ -11,7 +11,7 @@ RESULTS_DIR: 'results'  # path to results
 TRAIN:
   DATASET_SPLIT: 'train'
   VALID_SPLIT: 0.8
-  SAMPLE_SIZE: 100
+  SAMPLE_SIZE: -1 # 100
   BATCH_SIZE: 32
   NUM_EPOCHS: 5
   LR: 0.001

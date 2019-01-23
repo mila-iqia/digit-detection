@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import print_function
 import os
 
@@ -22,7 +20,7 @@ def train_model(model, train_loader, valid_loader, device,
     valid_loss_history = []
     valid_accuracy_history = []
     valid_best_accuracy = 0
-    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=cfg.TRAIN.LR)
     loss_ndigits = torch.nn.CrossEntropyLoss()
 
     print("# Start training #")

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 from pathlib import Path
 
@@ -72,7 +70,7 @@ def prepare_dataloaders(dataset_split,
                         dataset_path,
                         metadata_filename,
                         batch_size=32,
-                        sample_size=None,
+                        sample_size=-1,
                         valid_split=0.8):
     '''
     dataset_split (str) : Any of 'train', 'extra', 'test'
@@ -111,7 +109,7 @@ def prepare_dataloaders(dataset_split,
     #  indices = np.random.permutation(indices)
 
     # Only use a sample amount of data
-    if sample_size:
+    if sample_size != -1:
         indices = indices[:sample_size]
 
     if dataset_split in ['train', 'extra']:

@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import print_function
 import os
 import sys
@@ -17,7 +15,7 @@ import torch
 from utils.config import (cfg, cfg_from_file)
 from utils.dataloader import prepare_dataloaders
 from utils.misc import mkdir_p
-from models.models import BaselineCNN
+from models.models import ConvNet, BaselineCNN
 from trainer.trainer import train_model
 
 
@@ -34,9 +32,7 @@ def parse_args():
     return args
 
 
-if __name__ == '__main__':
-
-    # Load the config file
+def load_config():
     args = parse_args()
 
     if args.cfg_file:
@@ -67,13 +63,23 @@ if __name__ == '__main__':
     print('Using config:')
     pprint.pprint(cfg)
 
-    # make the results reproductible
-    print('pytorch/random seed: {}'.format(cfg.SEED))
-    random.seed(cfg.SEED)
-    numpy.random.seed(cfg.SEED)
-    torch.manual_seed(cfg.SEED)
+
+def fix_seed(seed):
+    print('pytorch/random seed: {}'.format(seed))
+    random.seed(seed)
+    numpy.random.seed(seed)
+    torch.manual_seed(seed)
     if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(cfg.SEED)
+        torch.cuda.manual_seed_all(seed)
+
+
+if __name__ == '__main__':
+
+    # Load the config file
+    load_config()
+
+    # Make the results reproductible
+    fix_seed(cfg.SEED)
 
     # Prepare data
     (train_loader,
@@ -85,7 +91,8 @@ if __name__ == '__main__':
                                          valid_split=cfg.TRAIN.VALID_SPLIT)
 
     # Define model architecture
-    baseline_cnn = BaselineCNN()
+    baseline_cnn = ConvNet(num_classes=7)
+    # baseline_cnn = BaselineCNN()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
