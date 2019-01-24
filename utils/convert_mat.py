@@ -10,12 +10,21 @@ from utils.misc import save_obj
 
 
 def get_box_data(index, hdf5_data):
-    """
-    get `left, top, width, height` of each picture
-    :param index:
-    :param hdf5_data:
-    :return:
-    """
+    '''
+    Get `left, top, width, height` of each picture.
+    
+    Parameters
+    ----------
+    index : ???
+        Description.
+    hdf5_data: ???
+        Desciption.
+    
+    Returns
+    -------
+    meta_data: ???
+        Desciption
+    '''
     meta_data = dict()
     meta_data['height'] = []
     meta_data['label'] = []
@@ -24,6 +33,17 @@ def get_box_data(index, hdf5_data):
     meta_data['width'] = []
 
     def print_attrs(name, obj):
+        '''
+        Description.
+        
+        Parameters
+        ----------
+        name : ???
+            Description.
+        obj: ???
+            Desciption.
+        
+        '''
         vals = []
         if obj.shape[0] == 1:
             vals.append(obj[0][0])
@@ -38,12 +58,43 @@ def get_box_data(index, hdf5_data):
 
 
 def get_name(index, hdf5_data):
+    '''
+    Description.
+    
+    Parameters
+    ----------
+    index : ???
+        Description.
+    hdf5_data: ???
+        Desciption.
+    
+    Returns
+    -------
+    ???
+        Desciption
+    
+    '''
     name = hdf5_data['/digitStruct/name']
     return ''.join([chr(v[0]) for v in hdf5_data[name[index][0]].value])
 
 
 def aggregate_data(index, hdf5_data):
-
+    '''
+    Description.
+    
+    Parameters
+    ----------
+    index : ???
+        Description.
+    hdf5_data: ???
+        Desciption.
+    
+    Returns
+    -------
+    metadata: ???
+        Desciption
+    
+    '''
     image_id = get_name(index, hdf5_data)
     labels = get_box_data(index, hdf5_data)
 
@@ -60,6 +111,17 @@ def aggregate_data(index, hdf5_data):
 
 
 def convert_mat_file(data_dir, filename_mat, filename_out='labels'):
+    '''
+    Description.
+    
+    Parameters
+    ----------
+    index : ???
+        Description.
+    hdf5_data: ???
+        Desciption.
+    
+    '''
     mat_data = h5py.File(filename_mat)
     dataset_size = mat_data['/digitStruct/name'].size
 

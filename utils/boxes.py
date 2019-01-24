@@ -4,18 +4,21 @@ import numpy as np
 def extract_labels_boxes(meta):
     '''
     Extract the labels and boxes from the raw metadata.
+    
     Parameters
     ----------
     meta : dict
         The metadata is what is contained in the dict from the pickle files
         provided with the project in e.g. data/SVHN/train/labels.pkl.
+    
     Returns
     -------
     labels : list
-        Contains the integers of the digits present in the image
+        Contains the integers of the digits present in the image.
     boxes : list
         Contains the tuples (x1, x2, y1, y2) of coordinates of bounding boxes
-        associated to each digit in labels
+        associated to each digit in labels.
+
     '''
 
     N = len(meta['label'])  # Number of digits in image
@@ -39,7 +42,24 @@ def extract_labels_boxes(meta):
 
 
 def extract_outer_box(sample, padding=0.3):
+    '''
+    Extract outer box from individuals boxes.
+    
+    Parameters
+    ----------
+    sample : Dict
+        Output of the dataloader. 
+    padding : float
+        Percentage of padding around the bounding boxe containg
+        all digits.
+   
+    Returns
+    -------
+    outer_bbox : Tuple
+        Tuple (x1, x2, y1, y2) of coordinates of bounding boxes
+        associated to the digits sequence.
 
+    '''
     img_shape = np.asarray(sample['image']).shape
     boxes = sample['metadata']['boxes']
 

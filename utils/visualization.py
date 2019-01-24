@@ -3,6 +3,17 @@ from matplotlib import patches
 
 
 def visualize_sample(sample, outer_bbox=None):
+    '''
+    Description.
+
+    Parameters
+    ----------
+    sample : dict
+        Output of the dataloader.
+    outer_bbox: ???
+        Description.
+
+    '''
 
     img = sample['image']
     boxes = sample['metadata']['boxes']

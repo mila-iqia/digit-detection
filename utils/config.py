@@ -9,7 +9,7 @@ import numpy as np
 __C = edict()
 cfg = __C
 
-__C.CONFIG_NAME = 'BaselineCNN'
+__C.CONFIG_NAME = 'ConNet'
 __C.DATASET_NAME = 'SVHN'
 __C.SEED = 1234
 
@@ -24,7 +24,8 @@ __C.TRAIN.LR = 0.001
 
 
 def _merge_a_into_b(a, b):
-    """Merge config dictionary a into config dictionary b, clobbering the
+    '''
+    Merge config dictionary a into config dictionary b, clobbering the
     options in b whenever they are also specified in a.
 
     Parameters
@@ -33,7 +34,7 @@ def _merge_a_into_b(a, b):
         Config dictionary a.
     b : dict
         Config dictionary b.
-    """
+    '''
     if type(a) is not edict:
         return
 
@@ -66,13 +67,15 @@ def _merge_a_into_b(a, b):
 
 
 def cfg_from_file(filename):
-    """Load a config file and merge it into the default options.
+    '''
+    Load a config file and merge it into the default options.
 
     Parameters
     ----------
     filename : string
         Path to filename.
-    """
+
+    '''
     import yaml
     with open(filename, 'r') as f:
         yaml_cfg = edict(yaml.load(f))

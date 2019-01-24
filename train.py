@@ -24,14 +24,23 @@ sys.path.append(dir_path)
 
 
 def parse_args():
+    '''
+    Parser for the arguments.
+
+    Returns
+    ----------
+    args : obj
+        The arguments.
+
+    '''
     parser = argparse.ArgumentParser(description='Train a CNN network')
-    parser.add_argument('--cfg', dest='cfg_file', type=str,
+    parser.add_argument('--cfg', type=str,
                         default=None,
                         help='optional config file')
 
-    parser.add_argument("--metadata_filename", type=str, default='')
-    # metadata_filename will be the absolute path to the directory to be used for
-    # evaluation.
+    parser.add_argument("--metadata_filename", type=str,
+                        default='',
+                        help='metadata_filename will be the absolute path to the directory to be used for evaluation.')
 
     parser.add_argument("--dataset_dir", type=str, default='')
     # dataset_dir will be the absolute path to the directory to be used for
@@ -46,11 +55,14 @@ def parse_args():
 
 
 def load_config():
+    '''
+    Load the config .yml file.
+
+    '''
     args = parse_args()
 
-    if args.cfg_file:
-        args.cfg_file = os.path.join('config', args.cfg_file)
-        cfg_from_file(args.cfg_file)
+    if args.cfg:
+        cfg_from_file(args.cfg)
 
     now = datetime.datetime.now(dateutil.tz.tzlocal())
     timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
@@ -65,8 +77,8 @@ def load_config():
 
     mkdir_p(cfg.OUTPUT_DIR)
 
-    if args.cfg_file:
-        copyfile(args.cfg_file, os.path.join(cfg.OUTPUT_DIR, 'comfig.yml'))
+    if args.cfg:
+        copyfile(args.cfg, os.path.join(cfg.OUTPUT_DIR, 'comfig.yml'))
 
     print('Data dir: {}'.format(cfg.INPUT_DIR))
     print('Output dir: {}'.format(cfg.OUTPUT_DIR))
@@ -76,6 +88,15 @@ def load_config():
 
 
 def fix_seed(seed):
+    '''
+    Fix the seed.
+
+    Parameters
+    ----------
+    seed: int
+        The seed to use.
+
+    '''
     print('pytorch/random seed: {}'.format(seed))
     random.seed(seed)
     numpy.random.seed(seed)
@@ -102,8 +123,8 @@ if __name__ == '__main__':
                                          valid_split=cfg.TRAIN.VALID_SPLIT)
 
     # Define model architecture
-    # baseline_cnn = ConvNet(num_classes=7)
-    baseline_cnn = BaselineCNN()
+    baseline_cnn = ConvNet(num_classes=7)
+    # baseline_cnn = BaselineCNN()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)

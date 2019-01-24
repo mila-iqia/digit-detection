@@ -13,6 +13,27 @@ from utils.config import cfg
 def train_model(model, train_loader, valid_loader, device,
                 num_epochs=cfg.TRAIN.NUM_EPOCHS, lr=cfg.TRAIN.LR,
                 model_filename=None):
+    '''
+    Training loop.
+
+    Parameters
+    ----------
+    model : obj
+        The model.
+    train_loader : obj
+        The train data loader.
+    valid_loader : obj
+        The validation data loader.
+    device : str
+        The type of device to use ('cpu' or 'gpu').
+    num_eopchs : int
+        Number of epochs to train the model.
+    lr : float
+        Learning rate for the optimizer.
+    model_filename : str
+        path/filename where to save the model.
+
+    '''
 
     since = time.time()
     model = model.to(device)

@@ -5,19 +5,40 @@ from utils.boxes import extract_outer_box
 
 
 class FirstCrop(object):
-    """Crop the image such that all bounding boxes +30% in x,y are
-       contained in the image.
-    Args:
-        output_size (tuple or int): Desired output size. If tuple, output is
-            matched to output_size. If int, smaller of image edges is matched
-            to output_size keeping aspect ratio the same.
-    """
 
     def __init__(self, pad_size):
+        '''
+        Crop the image such that all bounding boxes +30% in x,y are
+        contained in the image.
 
+        Parameters
+        ----------
+        index : int
+            The index of the datasets.
+
+        Returns
+        -------
+        pad_size: ???
+            Description.
+
+        '''
         self.pad_size = pad_size
 
     def __call__(self, sample):
+        '''
+        Description.
+
+        Parameters
+        ----------
+        sample : dict
+            Output of the dataloader.
+
+        Returns
+        -------
+        dict
+            Description.
+
+        '''
 
         image = sample['image']
         labels = sample['metadata']['labels']
@@ -43,18 +64,37 @@ class FirstCrop(object):
 
 
 class Rescale(object):
-    """Rescale the image in a sample to a given size.
-    Args:
-        output_size (tuple): Desired output size. If tuple, output is
-            matched to output_size. If int, smaller of image edges is matched
-            to output_size keeping aspect ratio the same.
-    """
 
     def __init__(self, output_size):
+        '''
+        Rescale the image in a sample to a given size.s
+
+        Parameters
+        ----------
+        output_size : tuple or int
+            Desired output size. If tuple, output is matched to output_size.
+            If int, smaller of image edges is matched to output_size keeping
+            aspect ratio the same.
+
+        '''
         assert isinstance(output_size, (int, tuple))
         self.output_size = output_size
 
     def __call__(self, sample):
+        '''
+        Desfinition.
+
+        Parameters
+        ----------
+        sample : dict
+            Output of the dataloader.
+
+        Returns
+        -------
+        metada : dict
+            Description.
+
+        '''
         image = sample['image']
         boxes = sample['metadata']['boxes']
         labels = sample['metadata']['labels']
@@ -84,13 +124,18 @@ class Rescale(object):
 
 
 class RandomCrop(object):
-    """Crop randomly the image in a sample.
-    Args:
-        output_size (tuple or int): Desired output size. If int, square crop
-            is made.
-    """
 
     def __init__(self, output_size):
+        '''
+        Crop randomly the image in a sample.
+
+        Parameters
+        ----------
+        output_size: tuple or int
+            Desired output size. If int, square crop
+            is made.
+
+        '''
         assert isinstance(output_size, (int, tuple))
         if isinstance(output_size, int):
             self.output_size = (output_size, output_size)
@@ -99,6 +144,19 @@ class RandomCrop(object):
             self.output_size = output_size
 
     def __call__(self, sample):
+        '''
+        Description.
+
+        Parameters
+        ----------
+        sample : dict
+            Output of the dataloader.
+
+        Returns
+        -------
+        dict
+            Description. 
+        '''
 
         image = sample['image']
         labels = sample['metadata']['labels']
@@ -130,6 +188,20 @@ class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
+        '''
+        Convert ndarrays in sample to Tensores.
+
+        Parameters
+        ----------
+        sample : dict
+            Output of the dataloader.
+
+        Returns
+        -------
+        dict
+            Description.
+
+        '''
 
         image = sample['image']
         labels = sample['metadata']['labels']

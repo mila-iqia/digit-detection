@@ -19,31 +19,49 @@ from utils.boxes import extract_labels_boxes
 class SVHNDataset(data.Dataset):
 
     def __init__(self, metadata, data_dir, transform=None):
-        """
-        Args:
-            labels (dict): Dictionary containing all labels and metadata
-            data_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
-        """
+        '''
+        Description.
+        
+        Parameters
+        ----------
+        metadata : ???
+            Description.
+        data_dir : str
+            Directory with all the images.
+        transform : callable, optional
+            Optional transform to be applied on a sample.
+
+        '''
         self.metadata = metadata
         self.data_dir = data_dir
         self.transform = transform
 
     def __len__(self):
+        '''
+        Description
+        
+        Returns
+        -------
+        int
+            ???
+        
+        '''
         return len(self.metadata)
 
     def __getitem__(self, index):
         '''
+        Description.
+        
         Parameters
         ----------
         index : int
             The index of the dataset
+        
         Returns
         -------
-        X : PIL objet
-        y : dict
-            The metadata associated to the image in dict form.
+        sample: ???
+            Description.
+
         '''
         'Generates one sample of data'
 
@@ -73,14 +91,36 @@ def prepare_dataloaders(dataset_split,
                         sample_size=-1,
                         valid_split=0.8):
     '''
-    dataset_split (str) : Any of 'train', 'extra', 'test'
-    metadata_filename (str) : Absolute path to the metadata pickle file
-    dataset_path (str) : Absolute path to the dataset
-        (i.e. .../data/SVHN/train')
-    valid_split (float) : Returns a validation split of %size
-    valid_split*100, should be in range [0,1]
-    sample_size (int) : Number of elements to use as sample size,
-    for debugging purposes only.
+    Description.
+
+    Parameters
+    ----------
+    dataset_split : str 
+        Any of 'train', 'extra', 'test'.
+    dataset_path : str
+        Absolute path to the dataset. (i.e. .../data/SVHN/train')
+    metadata_filename : str
+        Absolute path to the metadata pickle file.
+    batch_size : int
+        Mini-batch size.
+    sample_size : int
+        Number of elements to use as sample size,
+        for debugging purposes only. If -1, use all samples.
+    valid_split : float
+        Returns a validation split of %size ; valid_split*100,
+        should be in range [0,1].
+
+    Returns
+    -------
+    if dataset_split in ['train', 'extra']:
+        train_loader: ???
+            Description.
+        valid_loader: ???
+            Description.
+
+    if dataset_split in ['test']:
+        test_loader: ???
+            Description. 
     '''
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
