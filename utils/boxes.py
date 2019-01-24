@@ -4,13 +4,13 @@ import numpy as np
 def extract_labels_boxes(meta):
     '''
     Extract the labels and boxes from the raw metadata.
-    
+
     Parameters
     ----------
     meta : dict
         The metadata is what is contained in the dict from the pickle files
         provided with the project in e.g. data/SVHN/train/labels.pkl.
-    
+
     Returns
     -------
     labels : list
@@ -44,15 +44,15 @@ def extract_labels_boxes(meta):
 def extract_outer_box(sample, padding=0.3):
     '''
     Extract outer box from individuals boxes.
-    
+
     Parameters
     ----------
     sample : Dict
-        Output of the dataloader. 
+        Output of the dataloader.
     padding : float
         Percentage of padding around the bounding boxe containg
-        all digits.
-   
+        all digits. Should be in range [0, 1].
+
     Returns
     -------
     outer_bbox : Tuple

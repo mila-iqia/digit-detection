@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-
 
 from PIL import Image
 from torch.utils import data
@@ -20,14 +18,34 @@ class SVHNDataset(data.Dataset):
 
     def __init__(self, metadata, data_dir, transform=None):
         '''
-        Description.
-        
+        Initialize the Dataset.
+
         Parameters
         ----------
-        metadata : ???
-            Description.
+        metadata : dict
+        Each key in metadata will contain a filename and all associated
+        metadata. The filename is with respect to the directory it's in,
+        and metadata contains four 5 fields:
+        * `label` - which lists all digits present in image, in order
+        * `height`,`width`,`top`,`left` which list the corresponding pixel
+        information about the digits bounding boxes.
+
+        {0: {'filename': '1.png',
+        'metadata': {'height': [219, 219],
+        'label': [1, 9],
+        'left': [246, 323],
+        'top': [77, 81],
+        'width': [81, 96]}},
+        1: {'filename': '2.png',
+        'metadata': {'height': [32, 32],
+        'label': [2, 3],
+        'left': [77, 98],
+        'top': [29, 25],
+        'width': [23, 26]}}, ...
+
         data_dir : str
             Directory with all the images.
+
         transform : callable, optional
             Optional transform to be applied on a sample.
 
@@ -38,29 +56,33 @@ class SVHNDataset(data.Dataset):
 
     def __len__(self):
         '''
-        Description
-        
+        Evaluate the length of the dataset object
+
         Returns
         -------
         int
-            ???
-        
+            The length of the dataset.
+
         '''
         return len(self.metadata)
 
     def __getitem__(self, index):
         '''
-        Description.
-        
+        Get an indexed item from the dataset and return it.
+
         Parameters
         ----------
         index : int
             The index of the dataset
-        
+
         Returns
         -------
-        sample: ???
-            Description.
+        sample: dict
+            sample['image'] contains the image array.
+            The type may be a torch.tensor or ndarray depending on transforms
+            sample['metadata'] will contain the metadata associated to the
+            image. It can be one of ['labels','boxes','filename']
+
 
         '''
         'Generates one sample of data'
@@ -91,11 +113,11 @@ def prepare_dataloaders(dataset_split,
                         sample_size=-1,
                         valid_split=0.8):
     '''
-    Description.
+    Utility function to prepare dataloaders for training.
 
     Parameters
     ----------
-    dataset_split : str 
+    dataset_split : str
         Any of 'train', 'extra', 'test'.
     dataset_path : str
         Absolute path to the dataset. (i.e. .../data/SVHN/train')
@@ -107,20 +129,20 @@ def prepare_dataloaders(dataset_split,
         Number of elements to use as sample size,
         for debugging purposes only. If -1, use all samples.
     valid_split : float
-        Returns a validation split of %size ; valid_split*100,
-        should be in range [0,1].
+        Returns a validation split of %size; valid_split*100,
+        valid_split should be in range [0,1].
 
     Returns
     -------
     if dataset_split in ['train', 'extra']:
-        train_loader: ???
-            Description.
+        train_loader: torch.utils.DataLoader
+            Dataloader containing training data.
         valid_loader: ???
-            Description.
+            Dataloader containing validation data.
 
     if dataset_split in ['test']:
-        test_loader: ???
-            Description. 
+        test_loader: torch.utils.DataLoader
+            Dataloader containing test data.
     '''
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"

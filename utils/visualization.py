@@ -4,14 +4,15 @@ from matplotlib import patches
 
 def visualize_sample(sample, outer_bbox=None):
     '''
-    Description.
+    Utility function to allow visualization of samples.
 
     Parameters
     ----------
     sample : dict
-        Output of the dataloader.
-    outer_bbox: ???
-        Description.
+        Output of the dataloader or any of the transforms (except ToTensor).
+    outer_bbox: tuple
+        Tuple of coordinates (x1, x2, y1, y2) to bounding box surrounding
+        all bboxes of digits in an image. Optional
 
     '''
 

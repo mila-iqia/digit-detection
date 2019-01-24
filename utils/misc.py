@@ -7,7 +7,7 @@ import pickle
 def mkdir_p(path):
     '''
     Make a directory.
-    
+
     Parameters
     ----------
     path : str
@@ -22,10 +22,11 @@ def mkdir_p(path):
         else:
             raise
 
+
 def save_obj(obj, filename):
     '''
     Save an object in pickle format.
-    
+
     Parameters
     ----------
     obj : object
@@ -41,7 +42,7 @@ def save_obj(obj, filename):
 def load_obj(filename):
     '''
     Load an object from pickle format.
-    
+
     Parameters
     ----------
     filename: str

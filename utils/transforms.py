@@ -6,37 +6,37 @@ from utils.boxes import extract_outer_box
 
 class FirstCrop(object):
 
+    '''
+    Crop the image such that all bounding boxes +pad_size% in x,y are
+    contained in the image.
+
+    '''
+
     def __init__(self, pad_size):
         '''
-        Crop the image such that all bounding boxes +30% in x,y are
-        contained in the image.
 
         Parameters
         ----------
-        index : int
-            The index of the datasets.
-
-        Returns
-        -------
-        pad_size: ???
-            Description.
+        pad_size : float
+            Percentage of padding around the bounding boxe containg
+            all digits. Should be in range [0, 1].
 
         '''
         self.pad_size = pad_size
 
     def __call__(self, sample):
         '''
-        Description.
 
         Parameters
         ----------
         sample : dict
-            Output of the dataloader.
+            dict with ['image', 'metadata'] keys.
 
         Returns
         -------
-        dict
-            Description.
+        sample_trans : dict
+            Modified image and associated metadata corresponding to the
+            transformation.
 
         '''
 
@@ -60,7 +60,9 @@ class FirstCrop(object):
                     'labels': labels,
                     'filename': filename}
 
-        return {'image': img_cropped, 'metadata': metadata}
+        sample_trans = {'image': img_cropped, 'metadata': metadata}
+
+        return sample_trans
 
 
 class Rescale(object):
@@ -82,17 +84,17 @@ class Rescale(object):
 
     def __call__(self, sample):
         '''
-        Desfinition.
 
         Parameters
         ----------
         sample : dict
-            Output of the dataloader.
+            dict with ['image', 'metadata'] keys.
 
         Returns
         -------
-        metada : dict
-            Description.
+        sample_trans : dict
+            Modified image and associated metadata corresponding to the
+            transformation.
 
         '''
         image = sample['image']
@@ -120,7 +122,9 @@ class Rescale(object):
                     'labels': labels,
                     'filename': filename}
 
-        return {'image': image_scaled, 'metadata': metadata}
+        sample_trans = {'image': image_scaled, 'metadata': metadata}
+
+        return sample_trans
 
 
 class RandomCrop(object):
@@ -145,17 +149,18 @@ class RandomCrop(object):
 
     def __call__(self, sample):
         '''
-        Description.
 
         Parameters
         ----------
         sample : dict
-            Output of the dataloader.
+            dict with ['image', 'metadata'] keys.
 
         Returns
         -------
-        dict
-            Description. 
+        sample_trans : dict
+            Modified image and associated metadata corresponding to the
+            transformation.
+
         '''
 
         image = sample['image']
@@ -181,7 +186,9 @@ class RandomCrop(object):
                     'labels': labels,
                     'filename': filename}
 
-        return {'image': image_cropped, 'metadata': metadata}
+        sample_trans = {'image': image_cropped, 'metadata': metadata}
+
+        return sample_trans
 
 
 class ToTensor(object):
@@ -189,17 +196,18 @@ class ToTensor(object):
 
     def __call__(self, sample):
         '''
-        Convert ndarrays in sample to Tensores.
 
         Parameters
         ----------
         sample : dict
-            Output of the dataloader.
+            dict with ['image', 'metadata'] keys.
 
         Returns
         -------
-        dict
-            Description.
+        sample_tensor : dict
+            Modified image and associated metadata corresponding to the
+            transformation to be compatible with pytorch. Contains the keys
+            ['image', 'target', 'filename']
 
         '''
 
@@ -240,6 +248,8 @@ class ToTensor(object):
 
         target = torch.from_numpy(target).int()
 
-        return {'image': image,
-                'target': target,
-                'filename': filename}
+        sample_tensor = {'image': image,
+                         'target': target,
+                         'filename': filename}
+
+        return sample_tensor
