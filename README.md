@@ -60,7 +60,7 @@ To evaluate your model run: `scripts/local/eval.sh`
 
 Notes:
 - You might want to change the path for storing data and results in
-the .sh files.
+the `.sh` files.
 - If the .sh files does not appear to be executable files do
 `chmod +x file_name.sh` and it should work.
 - You can use `command &> output.txt` to save both the standard output
