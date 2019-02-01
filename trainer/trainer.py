@@ -1,5 +1,4 @@
 from __future__ import print_function
-import os
 
 import copy
 import time
@@ -12,7 +11,7 @@ from utils.config import cfg
 
 def train_model(model, train_loader, valid_loader, device,
                 num_epochs=cfg.TRAIN.NUM_EPOCHS, lr=cfg.TRAIN.LR,
-                model_filename=None):
+                output_dir=None):
     '''
     Training loop.
 
@@ -30,8 +29,8 @@ def train_model(model, train_loader, valid_loader, device,
         Number of epochs to train the model.
     lr : float
         Learning rate for the optimizer.
-    model_filename : str
-        path/filename where to save the model.
+    output_dir : str
+        path to the directory where to save the model.
 
     '''
 
@@ -126,7 +125,8 @@ def train_model(model, train_loader, valid_loader, device,
             valid_best_accuracy = valid_accuracy
             best_model = copy.deepcopy(model)
             print('Checkpointing new model...')
-            torch.save(model, 'results/checkpoint.pth')
+            model_filename = output_dir + '/checkpoint.pth'
+            torch.save(model, model_filename)
         valid_accuracy_history.append(valid_accuracy)
 
     time_elapsed = time.time() - since
@@ -134,9 +134,7 @@ def train_model(model, train_loader, valid_loader, device,
     print('\n\nTraining complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
 
-    if model_filename:
-        print('Saving model ...')
-        timestr = time.strftime("_%Y%m%d_%H%M%S")
-        model_filename = model_filename + timestr + '.pth'
-        torch.save(best_model, model_filename)
-        print('Best model saved to :', model_filename)
+    print('Saving model ...')
+    model_filename = output_dir + '/best_model.pth'
+    torch.save(best_model, model_filename)
+    print('Best model saved to :', model_filename)

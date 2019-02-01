@@ -34,6 +34,7 @@ def _merge_a_into_b(a, b):
         Config dictionary a.
     b : dict
         Config dictionary b.
+
     '''
     if type(a) is not edict:
         return

@@ -10,4 +10,4 @@ TRAIN:
   BATCH_SIZE: 32
   NUM_EPOCHS: 5
   LR: 0.001
-  
+

@@ -45,7 +45,6 @@ class SVHNDataset(data.Dataset):
 
         data_dir : str
             Directory with all the images.
-
         transform : callable, optional
             Optional transform to be applied on a sample.
 
@@ -137,12 +136,13 @@ def prepare_dataloaders(dataset_split,
     if dataset_split in ['train', 'extra']:
         train_loader: torch.utils.DataLoader
             Dataloader containing training data.
-        valid_loader: ???
+        valid_loader: torch.utils.DataLoader
             Dataloader containing validation data.
 
     if dataset_split in ['test']:
         test_loader: torch.utils.DataLoader
             Dataloader containing test data.
+
     '''
 
     assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"

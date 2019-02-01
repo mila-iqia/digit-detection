@@ -24,3 +24,4 @@ dependencies:
     - gpustat
     - sklearn
     - easydict
+    - ipdb

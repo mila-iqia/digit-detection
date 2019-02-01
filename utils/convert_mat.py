@@ -12,18 +12,23 @@ from utils.misc import save_obj
 def get_box_data(index, hdf5_data):
     '''
     Get `left, top, width, height` of each picture.
-    
+
     Parameters
     ----------
-    index : ???
-        Description.
-    hdf5_data: ???
-        Desciption.
-    
+    index : int
+        Index.
+    hdf5_data : ndarray
+        ndarray representing the hdf5 file.
+
     Returns
     -------
-    meta_data: ???
-        Desciption
+    meta_data : dict
+        Dictionary with the meta data corresponding to the index. The
+        dictionary contains four 5 fields:
+        * `label` - which lists all digits present in image, in order
+        * `height`,`width`,`top`,`left` which list the corresponding
+        pixel information about the digits bounding boxes.
+
     '''
     meta_data = dict()
     meta_data['height'] = []
@@ -35,14 +40,14 @@ def get_box_data(index, hdf5_data):
     def print_attrs(name, obj):
         '''
         Description.
-        
+
         Parameters
         ----------
-        name : ???
-            Description.
-        obj: ???
-            Desciption.
-        
+        name : str
+            Key in the dict.
+        obj : obj
+            Object.
+
         '''
         vals = []
         if obj.shape[0] == 1:
@@ -60,19 +65,19 @@ def get_box_data(index, hdf5_data):
 def get_name(index, hdf5_data):
     '''
     Description.
-    
+
     Parameters
     ----------
-    index : ???
-        Description.
-    hdf5_data: ???
-        Desciption.
-    
+    index : int
+        Index.
+    hdf5_data : ndarray
+        ndarray representing the hdf5 file.
+
     Returns
     -------
-    ???
-        Desciption
-    
+    str
+        Filename corresponding to the index.
+
     '''
     name = hdf5_data['/digitStruct/name']
     return ''.join([chr(v[0]) for v in hdf5_data[name[index][0]].value])
@@ -81,19 +86,37 @@ def get_name(index, hdf5_data):
 def aggregate_data(index, hdf5_data):
     '''
     Description.
-    
+
     Parameters
     ----------
-    index : ???
-        Description.
-    hdf5_data: ???
-        Desciption.
-    
+    index : int
+        Index.
+    hdf5_data: ndarray
+        ndarray representing the hdf5 file.
+
     Returns
     -------
-    metadata: ???
-        Desciption
-    
+    metadata : dict
+        Each key in metadata will contain a filename and all associated
+        metadata. The filename is with respect to the directory it's in,
+        and metadata contains four 5 fields:
+        * `label` - which lists all digits present in image, in order
+        * `height`,`width`,`top`,`left` which list the corresponding pixel
+        information about the digits bounding boxes.
+
+        {0: {'filename': '1.png',
+        'metadata': {'height': [219, 219],
+        'label': [1, 9],
+        'left': [246, 323],
+        'top': [77, 81],
+        'width': [81, 96]}},
+        1: {'filename': '2.png',
+        'metadata': {'height': [32, 32],
+        'label': [2, 3],
+        'left': [77, 98],
+        'top': [29, 25],
+        'width': [23, 26]}}, ...
+
     '''
     image_id = get_name(index, hdf5_data)
     labels = get_box_data(index, hdf5_data)
@@ -112,15 +135,17 @@ def aggregate_data(index, hdf5_data):
 
 def convert_mat_file(data_dir, filename_mat, filename_out='labels'):
     '''
-    Description.
-    
+    Convert a .mat file into .pkl file.
+
     Parameters
     ----------
-    index : ???
-        Description.
-    hdf5_data: ???
-        Desciption.
-    
+    data_dir : str
+        Directory with all the images.
+    filename_mat : str
+        Absolute path to the metadata .mat file.
+    filename_out : str
+        Absolute path to the metadata pickle file.
+
     '''
     mat_data = h5py.File(filename_mat)
     dataset_size = mat_data['/digitStruct/name'].size

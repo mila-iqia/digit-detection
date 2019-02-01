@@ -5,17 +5,17 @@ import sys
 import argparse
 import dateutil.tz
 import datetime
-import numpy
+import numpy as np
 import pprint
 import random
 from shutil import copyfile
 
 import torch
 
-from utils.config import (cfg, cfg_from_file)
+from utils.config import cfg, cfg_from_file
 from utils.dataloader import prepare_dataloaders
 from utils.misc import mkdir_p
-from models.models import ConvNet, BaselineCNN
+from models.models import BaselineCNN, ConvNet
 from trainer.trainer import train_model
 
 
@@ -36,19 +36,26 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Train a CNN network')
     parser.add_argument('--cfg', type=str,
                         default=None,
-                        help='optional config file')
+                        help='''optional config file,
+                             e.g. config/base_config.yml''')
 
     parser.add_argument("--metadata_filename", type=str,
-                        default='',
-                        help='metadata_filename will be the absolute path to the directory to be used for evaluation.')
+                        default='data/SVHN/train_metadata.pkl',
+                        help='''metadata_filename will be the absolute
+                                path to the directory to be used for
+                                training.''')
 
-    parser.add_argument("--dataset_dir", type=str, default='')
-    # dataset_dir will be the absolute path to the directory to be used for
-    # evaluation.
+    parser.add_argument("--dataset_dir", type=str,
+                        default='data/SVHN/train/',
+                        help='''dataset_dir will be the absolute path
+                                to the directory to be used for
+                                training''')
 
-    parser.add_argument("--results_dir", type=str, default='')
-    # results_dir will be the absolute path to a directory where the output of
-    # your inference will be saved.
+    parser.add_argument("--results_dir", type=str,
+                        default='results/',
+                        help='''results_dir will be the absolute
+                        path to a directory where the output of
+                        your training will be saved.''')
 
     args = parser.parse_args()
     return args
@@ -78,7 +85,7 @@ def load_config():
     mkdir_p(cfg.OUTPUT_DIR)
 
     if args.cfg:
-        copyfile(args.cfg, os.path.join(cfg.OUTPUT_DIR, 'comfig.yml'))
+        copyfile(args.cfg, os.path.join(cfg.OUTPUT_DIR, 'config.yml'))
 
     print('Data dir: {}'.format(cfg.INPUT_DIR))
     print('Output dir: {}'.format(cfg.OUTPUT_DIR))
@@ -98,9 +105,11 @@ def fix_seed(seed):
 
     '''
     print('pytorch/random seed: {}'.format(seed))
+    np.random.seed(seed)
     random.seed(seed)
-    numpy.random.seed(seed)
     torch.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
@@ -115,16 +124,19 @@ if __name__ == '__main__':
 
     # Prepare data
     (train_loader,
-     valid_loader) = prepare_dataloaders(dataset_split=cfg.TRAIN.DATASET_SPLIT,
-                                         dataset_path=cfg.INPUT_DIR,
-                                         metadata_filename=cfg.METADATA_FILENAME,
-                                         batch_size=cfg.TRAIN.BATCH_SIZE,
-                                         sample_size=cfg.TRAIN.SAMPLE_SIZE,
-                                         valid_split=cfg.TRAIN.VALID_SPLIT)
+     valid_loader) = prepare_dataloaders(
+        dataset_split=cfg.TRAIN.DATASET_SPLIT,
+        dataset_path=cfg.INPUT_DIR,
+        metadata_filename=cfg.METADATA_FILENAME,
+        batch_size=cfg.TRAIN.BATCH_SIZE,
+        sample_size=cfg.TRAIN.SAMPLE_SIZE,
+        valid_split=cfg.TRAIN.VALID_SPLIT)
 
     # Define model architecture
     baseline_cnn = ConvNet(num_classes=7)
     # baseline_cnn = BaselineCNN()
+
+    # import ipdb; ipdb.set_trace()
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
@@ -134,4 +146,4 @@ if __name__ == '__main__':
                 valid_loader=valid_loader,
                 num_epochs=cfg.TRAIN.NUM_EPOCHS,
                 device=device,
-                model_filename=cfg.OUTPUT_DIR)
+                output_dir=cfg.OUTPUT_DIR)

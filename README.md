@@ -17,57 +17,72 @@ case of a mobile application), etc.
 ### Use conda to manage your environments
 
 Verify that conda is installed and running on your system by typing
-`conda --version`. Conda displays the number of the version that you have
-installed. EXAMPLE: `conda 4.5.12`
+`conda --version` from your terminal. Conda displays the number of the
+version that you have installed. EXAMPLE: `conda 4.5.12`
 
 We recommend that you always keep conda updated to the latest version.
 To update conda type: `conda update conda`.
 
 Some resources that can be useful:
-[Install conda](https://conda.io/docs/user-guide/install/index.html)
-[Getting started with conda](https://conda.io/docs/user-guide/getting-started.html)
+[Install conda](https://conda.io/projects/conda/en/latest/user-guide/install/index.html)
+[Getting started with conda](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html)
 
 ### Create your environment
 
 We strongly recommend that you start with our preconfigured
 environment by using the provided `environment.yml` file by running in your
 terminal from the root directory `conda env create -f environment.yml`.
+If you have a mac use the `mac-environment.yml` file.
 
 Note:
-- To see a list of all your environment type `conda env list`
+- To activate the created environment, type
+`source activate digit-detection`.
+- To deactivate your environment, type `source deactivate`.
+- To see a list of all your environment type `conda env list`.
 - To see the list of the packages in your new environment type
-`conda list -n digit-detection`
-- To remove an environment type `conda env remove --name myenv`
+`conda list -n digit-detection`.
+- If a package is missing, you can add it via `conda install package`
+or `pip install package` after you activate your environment.
+- To remove an environment type `conda env remove --name myenv`.
 
 Resource that can be useful:
-[manage environment](https://conda.io/docs/user-guide/tasks/manage-environments.html)
+[manage environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
 
-### Activate and deactivate your environment
-To activate the created environment, type `source activate digit-detection`.
-To deactivate your environment, type `source deactivate`.
+## Run the code (from your terminal)
+First add in your `~/.bashrc` the python path to the digit-detection folder:
+`export PYTHONPATH="${PYTHONPATH}:/Users/johndoe/digit-detection"`
+
+To get the data run: `scripts/local/get_data.sh`
+
+To train the model run: `scripts/local/train.sh`
+
+To evaluate your model run: `scripts/local/eval.sh`
+
+Notes:
+- You might want to change the path for storing data and results in
+the .sh files.
+- If the .sh files does not appear to be executable files do
+`chmod +x file_name.sh` and it should work.
+- You can use `command &> output.txt` to save both the standard output
+and standard error display in your terminal. By doing this way,
+stream will be redirected to the file only, nothing will be visible in
+the terminal. If the file already exists, it gets overwritten.
+- You can use `command |& tee output.txt` to save both the standard output
+and standard error display in your terminal. By doing this way,
+streams will be copied to the file while still being visible in the
+terminal. If the file already exists, it gets overwritten.
+- You can run `nohup command > output.txt &` and all output, including
+any error messages, will be written to the file `output.txt`. If
+`command` is running when you log out or close the terminal,
+`command` will not terminate.
+- You can run `ps aux | grep bash` to see bash process that are running.
 
 ## Run the code interactively
+For debugging purpose you might want to run your code interactively.
 
-To run your code, activate your conda environment in the root directory:
-`source activate digit-detection`
-
-Note: Before running the code you need to download the data. Run:
-- `wget -P data/SVHN/ http://ufldl.stanford.edu/housenumbers/train.tar.gz`
-- `tar -xzf data/SVHN/train.tar.gz data/SVHN/`
-
-To train the model run the provided `train.py` file.
-Then, to evaluate your model, use the provided `test.py` file.
-
-## Run the code
-
-To run the code, use the `train_on_slurm.sh` file.
-That script will:
-- Copy your data to the proper directories
-- Execute training
-- Save models
-- Clean up your data
-
-Note: You might want to change the path for storing data and results.
+If you want to stop your code in a particular line you can add those
+lines there: `import ipdb; ipdb.set_trace()`.
+See [ipdb](https://pypi.org/project/ipdb/) for more informations.
 
 ## Data
 For more information about the data used and its format, consult the `README`
