@@ -7,6 +7,9 @@ import random
 from sklearn.metrics import confusion_matrix
 import torch
 
+import sys
+sys.path.append('..')
+
 from utils.dataloader import prepare_dataloaders
 
 
