@@ -68,12 +68,10 @@ def load_config():
     '''
     args = parse_args()
 
-    if args.cfg:
-        cfg_from_file(args.cfg)
-        copyfile(args.cfg, os.path.join(cfg.OUTPUT_DIR, 'config.yml'))
-
-    else:
+    if args.cfg is None:
         raise Exception("No config file specified.")
+
+    cfg_from_file(args.cfg)
 
     now = datetime.datetime.now(dateutil.tz.tzlocal())
     timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
@@ -87,6 +85,7 @@ def load_config():
         '%s_%s_%s' % (cfg.DATASET_NAME, cfg.CONFIG_NAME, timestamp))
 
     mkdir_p(cfg.OUTPUT_DIR)
+    copyfile(args.cfg, os.path.join(cfg.OUTPUT_DIR, 'config.yml'))
 
     print('Data dir: {}'.format(cfg.INPUT_DIR))
     print('Output dir: {}'.format(cfg.OUTPUT_DIR))
