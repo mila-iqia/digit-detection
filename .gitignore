@@ -8,6 +8,7 @@
 *.mat
 *.m
 *.tar.gz
+*.err
 *.out
 *.txt
 
