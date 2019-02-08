@@ -135,7 +135,7 @@ if __name__ == '__main__':
     # Define model architecture
     # baseline_cnn = ConvNet(num_classes=7)
     baseline_cnn = BaselineCNN()
-    resnet18 = ResNet18()
+    resnet18 = ResNet18(num_classes=7)
     # baseline_cnn = BaselineCNN_dropout(p=0.5)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
