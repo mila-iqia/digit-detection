@@ -15,7 +15,7 @@ import torch
 from utils.config import cfg, cfg_from_file
 from utils.dataloader import prepare_dataloaders
 from utils.misc import mkdir_p
-from models.models import BaselineCNN, ConvNet, BaselineCNN_dropout
+from models.models import BaselineCNN, ConvNet, BaselineCNN_dropout, ResNet18
 from trainer.trainer import train_model
 
 
@@ -135,12 +135,13 @@ if __name__ == '__main__':
     # Define model architecture
     # baseline_cnn = ConvNet(num_classes=7)
     baseline_cnn = BaselineCNN()
+    resnet18 = ResNet18()
     # baseline_cnn = BaselineCNN_dropout(p=0.5)
 
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
-    train_model(baseline_cnn,
+    train_model(resnet18,
                 train_loader=train_loader,
                 valid_loader=valid_loader,
                 num_epochs=cfg.TRAIN.NUM_EPOCHS,
