@@ -53,7 +53,7 @@ def train_model(model, train_loader, valid_loader, device,
         model = model.train()
 
         # Iterate over train data
-        print("Iterating over training data...")
+        print("\n\n\nIterating over training data...")
         for i, batch in enumerate(tqdm(train_loader)):
             # get the inputs
             inputs, targets = batch['image'], batch['target']
