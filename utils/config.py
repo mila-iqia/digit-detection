@@ -21,6 +21,7 @@ __C.TRAIN.SAMPLE_SIZE = 100
 __C.TRAIN.BATCH_SIZE = 32
 __C.TRAIN.NUM_EPOCHS = 5
 __C.TRAIN.LR = 0.001
+__C.TRAIN.MOM = 0.9
 
 
 def _merge_a_into_b(a, b):

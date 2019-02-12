@@ -1,4 +1,4 @@
-CONFIG_NAME: 'BaselineCNN'
+CONFIG_NAME: 'VGG19'
 DATASET_NAME: SVHN
 SEED: 1234
 
@@ -6,8 +6,8 @@ SEED: 1234
 TRAIN:
   DATASET_SPLIT: 'train'
   VALID_SPLIT: 0.8
-  SAMPLE_SIZE: -1 # 100
+  SAMPLE_SIZE: -1 # Number of samples to use (for debugging purposes), set to -1 to use the entire dataset
   BATCH_SIZE: 32
-  NUM_EPOCHS: 5
+  NUM_EPOCHS: 25
   LR: 0.001
-
+  MOM: 0.9
