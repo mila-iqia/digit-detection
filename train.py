@@ -15,9 +15,9 @@ import torch
 from utils.config import cfg, cfg_from_file
 from utils.dataloader import prepare_dataloaders
 from utils.misc import mkdir_p
-from models.baselines import BaselineCNN, ConvNet, BaselineCNN_dropout
+# from models.baselines import BaselineCNN, ConvNet, BaselineCNN_dropout
 from models.vgg import VGG
-from models.resnet import ResNet18
+# from models.resnet import ResNet18
 from trainer.trainer import train_model
 
 

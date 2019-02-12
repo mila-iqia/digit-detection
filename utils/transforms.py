@@ -174,13 +174,13 @@ class RandomCrop(object):
         top = np.random.randint(0, h - new_h)
         left = np.random.randint(0, w - new_w)
 
-        image_cropped = image.crop((left, top, left+new_w, top+new_h))
+        image_cropped = image.crop((left, top, left + new_w, top + new_h))
 
         boxes[:, 0:2] -= left
         boxes[:, 2:] -= top
 
-        boxes[:, :2] = np.clip(boxes[:, :2], 0, new_w-1)
-        boxes[:, 2:] = np.clip(boxes[:, 2:], 0, new_h-1)
+        boxes[:, :2] = np.clip(boxes[:, :2], 0, new_w - 1)
+        boxes[:, 2:] = np.clip(boxes[:, 2:], 0, new_h - 1)
 
         metadata = {'boxes': boxes,
                     'labels': labels,
@@ -244,7 +244,7 @@ class ToTensor(object):
         # Here we identify at most 5 digits
         for jj in range(min(len(labels), 5)):
 
-            target[jj+1] = labels[jj]
+            target[jj + 1] = labels[jj]
 
         target = torch.from_numpy(target).int()
 

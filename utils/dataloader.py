@@ -176,8 +176,8 @@ def prepare_dataloaders(dataset_split,
 
     if dataset_split in ['train', 'extra']:
 
-        train_idx = indices[:round(valid_split*len(indices))]
-        valid_idx = indices[round(valid_split*len(indices)):]
+        train_idx = indices[:round(valid_split * len(indices))]
+        valid_idx = indices[round(valid_split * len(indices)):]
 
         train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
         valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)

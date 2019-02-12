@@ -61,7 +61,7 @@ class ConvNet(nn.Module):
         return out
 
 
-class BaselineCNN(nn.Module): # Achieves ~91%
+class BaselineCNN(nn.Module):  # Achieves ~91%
 
     def __init__(self, num_classes):
         '''

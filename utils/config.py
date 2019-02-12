@@ -1,6 +1,5 @@
 from __future__ import division
 from __future__ import print_function
-import os.path as osp
 
 from easydict import EasyDict as edict
 import numpy as np
