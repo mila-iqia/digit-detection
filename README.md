@@ -42,9 +42,9 @@ Some resources that can be useful:
 ### Create your environment
 
 We strongly recommend that you start with our preconfigured
-environment by using the provided `environment.yml` file by running in your
-terminal from the root directory `conda env create -f environment.yml`.
-If you have a mac use the `mac-environment.yml` file.
+environment by using the provided `envs/environment.yml` file by running in your
+terminal from the root directory `conda env create -f envs/environment.yml`.
+If you have a mac use the `envs/mac-environment.yml` file. You can also use the provided `Pipfile` if you prefer using `pipenv`.
 
 Note:
 - To activate the created environment, type
