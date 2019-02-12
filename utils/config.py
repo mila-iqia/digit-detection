@@ -60,9 +60,9 @@ def _merge_a_into_b(a, b):
             if type(v) is edict:
                 try:
                     _merge_a_into_b(a[k], b[k])
-                except:
+                except Exception as e:
                     print('Error under config key: {}'.format(k))
-                    raise
+                    raise e
             else:
                 b[k] = v
 
