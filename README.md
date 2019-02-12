@@ -12,7 +12,19 @@ this application notably for the selection and development of the models we
 will use like the execution time, online vs. offline, the memory usage (in the
 case of a mobile application), etc.
 
-## Dependencies
+## Quick usage on Helios
+
+To run the code on Helios, you can use the scripts in `scrips/helios/train_on_helios.sh`. 
+
+You can run this directly from the login node using msub: 
+
+`msub -A $GROUP_RAP -l feature=k80,nodes=1:gpus=1,walltime=2:00:00 scripts/helios/train_on_helios.sh`
+
+You can easily add this script to a `.pbs` file with your specific settings.
+
+To change the data directories, you can modify the `train_on_helios.sh` script. To change configurations during training, use the `config/base_config.yml` file. This contains tuneable options that can be useful.
+
+## Dependencies (For local setups)
 
 ### Use conda to manage your environments
 
