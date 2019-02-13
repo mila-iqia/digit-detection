@@ -61,9 +61,9 @@ class ConvNet(nn.Module):
         return out
 
 
-class BaselineCNN(nn.Module): # Achieves ~91%
+class BaselineCNN(nn.Module):  # Achieves ~91%
 
-    def __init__(self):
+    def __init__(self, num_classes):
         '''
         Placeholder CNN
         '''
@@ -75,7 +75,7 @@ class BaselineCNN(nn.Module): # Achieves ~91%
         self.pool = nn.MaxPool2d(2, 2)
 
         self.fc1 = nn.Linear(7744, 4096)
-        self.fc2 = nn.Linear(4096, 7)
+        self.fc2 = nn.Linear(4096, num_classes)
 
     def forward(self, x):
         '''
@@ -106,7 +106,7 @@ class BaselineCNN(nn.Module): # Achieves ~91%
 
 class BaselineCNN_dropout(nn.Module):
 
-    def __init__(self, p=0.5):
+    def __init__(self, num_classes, p=0.5):
         '''
         Placeholder CNN
         '''
@@ -120,7 +120,7 @@ class BaselineCNN_dropout(nn.Module):
         self.dropout = nn.Dropout(self.p)
 
         self.fc1 = nn.Linear(7744, 4096)
-        self.fc2 = nn.Linear(4096, 7)
+        self.fc2 = nn.Linear(4096, num_classes)
 
     def forward(self, x):
         '''
@@ -142,7 +142,7 @@ class BaselineCNN_dropout(nn.Module):
         x = self.dropout(x)
 
         x = self.pool(F.relu(self.conv2(x)))
-        x  = self.dropout(x)
+        x = self.dropout(x)
         # Flatten based on batch size
         x = x.view(x.size(0), -1)
 

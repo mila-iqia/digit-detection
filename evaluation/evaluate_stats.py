@@ -26,6 +26,11 @@ def evaluate_stats(y_true, y_pred1, y_pred2):
     acc_pred1 = (y_pred1 == y_true) * 1
     acc_pred2 = (y_pred2 == y_true) * 1
 
+    def acc(y):
+        return np.sum(y) / len(y)
+    print("Accuracy of first model", acc(acc_pred1))
+    print("Accuracy of second model", acc(acc_pred2))
+
     stat, p_value = wilcoxon(acc_pred1, acc_pred2, zero_method='zsplit')
     # One-sided p_value
     p_value = p_value / 2

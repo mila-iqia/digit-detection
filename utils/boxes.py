@@ -30,7 +30,7 @@ def extract_labels_boxes(meta):
     for jj in range(N):
         labels.append(int(meta['label'][jj]))
         y1 = meta['top'][jj]
-        y2 = y1+meta['height'][jj]
+        y2 = y1 + meta['height'][jj]
         x1 = meta['left'][jj]
         x2 = x1 + meta['width'][jj]
 
@@ -68,15 +68,15 @@ def extract_outer_box(sample, padding=0.3):
     y1_tot = np.min(boxes[:, 2])
     y2_tot = np.max(boxes[:, 3])
 
-    x1_tot -= padding/2*(x2_tot-x1_tot)
-    x2_tot += padding/2*(x2_tot-x1_tot)
-    y1_tot -= padding/2*(y2_tot-y1_tot)
-    y2_tot += padding/2*(y2_tot-y1_tot)
+    x1_tot -= padding / 2 * (x2_tot - x1_tot)
+    x2_tot += padding / 2 * (x2_tot - x1_tot)
+    y1_tot -= padding / 2 * (y2_tot - y1_tot)
+    y2_tot += padding / 2 * (y2_tot - y1_tot)
 
     x1_tot = max(0, x1_tot)
-    x2_tot = min(x2_tot, img_shape[1]-1)
+    x2_tot = min(x2_tot, img_shape[1] - 1)
     y1_tot = max(0, y1_tot)
-    y2_tot = min(y2_tot, img_shape[0]-1)
+    y2_tot = min(y2_tot, img_shape[0] - 1)
 
     outer_bbox = (x1_tot, x2_tot, y1_tot, y2_tot)
 

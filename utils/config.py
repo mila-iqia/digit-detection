@@ -1,6 +1,5 @@
 from __future__ import division
 from __future__ import print_function
-import os.path as osp
 
 from easydict import EasyDict as edict
 import numpy as np
@@ -21,6 +20,7 @@ __C.TRAIN.SAMPLE_SIZE = 100
 __C.TRAIN.BATCH_SIZE = 32
 __C.TRAIN.NUM_EPOCHS = 5
 __C.TRAIN.LR = 0.001
+__C.TRAIN.MOM = 0.9
 
 
 def _merge_a_into_b(a, b):
@@ -60,9 +60,9 @@ def _merge_a_into_b(a, b):
             if type(v) is edict:
                 try:
                     _merge_a_into_b(a[k], b[k])
-                except:
+                except Exception as e:
                     print('Error under config key: {}'.format(k))
-                    raise
+                    raise e
             else:
                 b[k] = v
 
