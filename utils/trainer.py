@@ -7,7 +7,7 @@ import time
 import torch
 from tqdm import tqdm
 
-from models.models import BaselineCNN, BaselineCNN_dropout
+from models.baselines import BaselineCNN, BaselineCNN_dropout
 from models.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from models.vgg import VGG
 
