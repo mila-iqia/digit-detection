@@ -7,7 +7,7 @@ seed: 1234
 dataloader:
   train: True
   valid_split: 0.2
-  sample_size: 100 # Number of samples to use (for debugging purposes), set to -1 to use the entire dataset
+  sample_size: -1 # Number of samples to use (for debugging purposes), set to -1 to use the entire dataset
   batch_size: 32
 
 # Hyperparameters of the model
@@ -23,4 +23,4 @@ optimizer:
 
 # Hyperparameters related to model training
 train:
-  num_epochs: 100
+  num_epochs: 25
