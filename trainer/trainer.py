@@ -1,140 +1,260 @@
-from __future__ import print_function
 
+from __future__ import print_function
+import os
+
+from collections import OrderedDict
 import copy
+from easydict import EasyDict
+import operator
+from pathlib import Path
+import pprint
+import skopt
+import shutil
 import time
+import yaml
 
 import torch
-from tqdm import tqdm
 
-from utils.config import cfg
+from utils.config import parse_dict, generate_config
+from utils.dataloader import prepare_dataloaders
+from utils.misc import mkdir_p, save_obj, load_obj
+from utils.trainer import (
+    load_state_dict, save_state_dict, set_seed,
+    define_model, define_optimizer, define_loss,
+    define_train_cfg, batch_loop
+    )
 
 
-def train_model(model, train_loader, valid_loader, device,
-                num_epochs=cfg.TRAIN.NUM_EPOCHS, lr=cfg.TRAIN.LR,
-                output_dir=None):
+def train(cfg):
     '''
-    Training loop.
+    Training function.
 
     Parameters
     ----------
-    model : obj
-        The model.
-    train_loader : obj
-        The train data loader.
-    valid_loader : obj
-        The validation data loader.
-    device : str
-        The type of device to use ('cpu' or 'gpu').
-    num_eopchs : int
-        Number of epochs to train the model.
-    lr : float
-        Learning rate for the optimizer.
-    output_dir : str
-        path to the directory where to save the model.
+    cfg : dict
+        Config dict to use for training.
+
+    Returns
+    -------
+    valid_best_accuracy : float
+        Return the best model accuracy on validation set.
 
     '''
 
-    since = time.time()
-    model = model.to(device)
-    train_loss_history = []
-    valid_loss_history = []
-    valid_accuracy_history = []
-    valid_best_accuracy = 0
-    optimizer = torch.optim.SGD(model.parameters(), lr=cfg.TRAIN.LR, momentum=cfg.TRAIN.MOM)
-    loss_ndigits = torch.nn.CrossEntropyLoss()
+    # Config
+    print('Using config:')
+    pprint.pprint(cfg)
 
-    print("# Start training #")
-    for epoch in range(num_epochs):
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    print('Device: ', device)
 
-        train_loss = 0
-        train_n_iter = 0
+    # Checkpointing
+    cfg_filename = os.path.join(cfg.output_dir, 'cfg.yml')
+    state_filename = os.path.join(cfg.output_dir, 'checkpoint_state.pth.tar')
+    state = EasyDict({'model': None,
+                      'optim': None,
+                      'train': None})
+    if Path(state_filename).exists():
+        with open(cfg_filename, 'r') as f:
+            save_cfg = EasyDict(yaml.load(f))
 
-        # Set model to train mode
-        model = model.train()
+        if not operator.eq(cfg, save_cfg):
+            raise AssertionError(
+                'The config is not the same as the checkpointing one')
 
-        # Iterate over train data
-        print("\n\n\nIterating over training data...")
-        for i, batch in enumerate(tqdm(train_loader)):
-            # get the inputs
-            inputs, targets = batch['image'], batch['target']
+        print('Load checkpoint...')
+        state = load_state_dict(state_filename, device)
+        cfg.seed = state.seed
 
-            inputs = inputs.to(device)
-            target_ndigits = targets[:, 0].long()
+    else:
+        # save config
+        with open(cfg_filename, 'w') as f:
+            yaml.dump(cfg, f, default_flow_style=False)
+        print('No checkpoint available...')
 
-            target_ndigits = target_ndigits.to(device)
+    # Seed
+    set_seed(cfg.seed)
 
-            # Zero the gradient buffer
-            optimizer.zero_grad()
+    # Data
+    train_loader, valid_loader = prepare_dataloaders(
+        cfg.input_dir, cfg.dataloader.valid_split,
+        cfg.dataloader.batch_size, cfg.dataloader.sample_size,)
 
-            # Forward
-            outputs = model(inputs)
+    # Model
+    model = define_model(cfg.model, device, state.model)
+    best_model = copy.deepcopy(model)
+    print('Using model:')
+    print(model)
 
-            loss = loss_ndigits(outputs, target_ndigits)
+    # Optimizer
+    optimizer = define_optimizer(cfg.optimizer, model.parameters(),
+                                 state.optim)
+    print('Using optimizer:')
+    print(optimizer)
 
-            # Backward
-            loss.backward()
+    # Loss
+    loss_function = define_loss()
 
-            # Optimize
-            optimizer.step()
+    # Training
+    train_cfg = define_train_cfg(cfg.train, state.train)
+    print('Start training...')
+    # Iterate over epochs
+    for epoch in range(train_cfg.starting_epoch, train_cfg.num_epochs):
 
-            # Statistics
-            train_loss += loss.item()
-            train_n_iter += 1
+        print('Iterating over training data...')
+        model.train()
+        train_loss, train_accuracy = batch_loop(
+            train_loader, model, optimizer,
+            loss_function, device, train=True)
 
-        valid_loss = 0
-        valid_n_iter = 0
-        valid_correct = 0
-        valid_n_samples = 0
+        print('Iterating over validation data...')
+        model.eval()
+        valid_loss, valid_accuracy = batch_loop(
+            valid_loader, model, optimizer,
+            loss_function, device, train=False)
 
-        # Set model to evaluate mode
-        model = model.eval()
+        # Keep trace of train/valid loss history and valid accuracy
+        train_cfg.train_loss_history.append(train_loss)
+        train_cfg.train_accuracy_history.append(train_accuracy)
+        train_cfg.valid_loss_history.append(valid_loss)
+        train_cfg.valid_accuracy_history.append(valid_accuracy)
 
-        # Iterate over valid data
-        print("Iterating over validation data...")
-        for i, batch in enumerate(tqdm(valid_loader)):
-            # get the inputs
-            inputs, targets = batch['image'], batch['target']
-
-            inputs = inputs.to(device)
-
-            target_ndigits = targets[:, 0].long()
-            target_ndigits = target_ndigits.to(device)
-
-            # Forward
-            outputs = model(inputs)
-
-            loss = loss_ndigits(outputs, target_ndigits)
-
-            # Statistics
-            valid_loss += loss.item()
-            valid_n_iter += 1
-            _, predicted = torch.max(outputs.data, 1)
-            valid_correct += (predicted == target_ndigits).sum().item()
-            valid_n_samples += target_ndigits.size(0)
-
-        train_loss_history.append(train_loss / train_n_iter)
-        valid_loss_history.append(valid_loss / valid_n_iter)
-        valid_accuracy = valid_correct / valid_n_samples
-
-        print('\nEpoch: {}/{}'.format(epoch + 1, num_epochs))
-        print('\tTrain Loss: {:.4f}'.format(train_loss / train_n_iter))
-        print('\tValid Loss: {:.4f}'.format(valid_loss / valid_n_iter))
+        print('\nEpoch: {}/{}'.format(epoch + 1, train_cfg.num_epochs))
+        print('\tTrain Loss: {:.4f}'.format(train_loss))
+        print('\tTrain Accuracy: {:.4f}'.format(train_accuracy))
+        print('\tValid Loss: {:.4f}'.format(valid_loss))
         print('\tValid Accuracy: {:.4f}'.format(valid_accuracy))
 
-        if valid_accuracy > valid_best_accuracy:
-            valid_best_accuracy = valid_accuracy
+        # Early stopping and checkpointing best model
+        if valid_accuracy > train_cfg.valid_best_accuracy:
+            train_cfg.patience = 0
+            train_cfg.valid_best_accuracy = valid_accuracy
             best_model = copy.deepcopy(model)
-            print('Checkpointing new model...')
-            model_filename = output_dir + '/checkpoint.pth'
-            torch.save(model, model_filename)
-        valid_accuracy_history.append(valid_accuracy)
 
-    time_elapsed = time.time() - since
+            print('New best model: checkpointing current state...')
+            train_cfg.epoch = epoch + 1
+            save_state_dict(state_filename, device,
+                            model, optimizer, train_cfg)
+
+        else:
+            train_cfg.patience += 1
+
+        if train_cfg.patience > train_cfg.max_patience:
+            print('Max patience reached, ending training')
+            break
+
+    time_elapsed = time.time() - train_cfg.since
 
     print('\n\nTraining complete in {:.0f}m {:.0f}s'.format(
         time_elapsed // 60, time_elapsed % 60))
 
-    print('Saving model ...')
-    model_filename = output_dir + '/best_model.pth'
+    print('Best valid accuracy: ', train_cfg.valid_best_accuracy)
+
+    print('Saving best model ...')
+    model_filename = cfg.output_dir + '/best_model.pth'
     torch.save(best_model, model_filename)
     print('Best model saved to :', model_filename)
+
+    return train_cfg.valid_best_accuracy
+
+
+def train_skopt(cfg, n_iter=10, base_estimator='GP',
+                n_initial_points=10, random_state=0,
+                train_function=train):
+
+    '''
+    Do a Bayesian hyperparameter optimization.
+
+    Parameters
+    ----------
+    cfg : dict
+        Configuration dict to use.
+    n_iter : int
+        Number of Bayesien optimization steps.
+    base_estimator : str
+        skopt Optimization procedure. In ['GP', 'RF', 'ET', 'GBRT']
+        Default 'GP'.
+    n_initial_points: int
+        Number of random search before starting the optimization.
+        Default 10.
+    random_state : int
+        Seed to use for skopt function.
+        Default 0.
+    train_function : object
+        The trainig procedure to optimize. The function should take
+        a dict as input and return a metric to maximize.
+
+    Returns
+    -------
+
+    '''
+
+    # Sparse the parameters that we want to optimize
+    skopt_args = OrderedDict(parse_dict(cfg))
+
+    # Create the optimizer
+    starting_iter = 0
+    optimizer = skopt.Optimizer(dimensions=skopt_args.values(),
+                                base_estimator=base_estimator,
+                                n_initial_points=n_initial_points,
+                                random_state=random_state)
+
+    valid_best_accuracy = 0
+    skopt_accuracy_history = []
+
+    # Checkpointing
+    state_skopt_filename = os.path.join(cfg.output_dir,
+                                        'checkpoint_skopt_state.pkl')
+
+    # Check if checkpointing exist
+    if Path(state_skopt_filename).exists():
+        print('Load skopt checkpoint...')
+        state_skopt = load_obj(state_skopt_filename)
+        state_skopt = EasyDict(state_skopt)
+        # Reset skopt hyper-parameters
+        starting_iter = state_skopt.iteration
+        optimizer.rng = state_skopt.optim_state
+        valid_best_accuracy = state_skopt.valid_best_accuracy
+        skopt_accuracy_history = state_skopt.skopt_accuracy_history
+    else:
+        print('No skopt checkpoint...')
+
+    for i in range(starting_iter, n_iter):
+        suggestion = optimizer.ask()
+        this_cfg = generate_config(cfg, skopt_args, suggestion)
+        this_cfg.output_dir = os.path.join(
+            this_cfg.output_dir, 'iter_' + str(i))
+        mkdir_p(this_cfg.output_dir)
+        try:
+            # We minimize the negative accuracy/AUC
+            valid_accuracy = train_function(this_cfg)
+            optimizer.tell(suggestion, - valid_accuracy)
+            skopt_accuracy_history.append(valid_accuracy)
+        except RuntimeError as e:
+            print('''The following error was raised:\n {} \n,
+                     launching next experiment.'''.format(e))
+            # Something went wrong, (probably a CUDA error).
+            valid_accuracy = 0.
+            optimizer.tell(suggestion, valid_accuracy)
+            skopt_accuracy_history.append(valid_accuracy)
+
+        state_skopt = {'optim_state': optimizer.rng,
+                       'iteration': i + 1,
+                       'valid_best_accuracy': valid_best_accuracy,
+                       'skopt_accuracy_history': skopt_accuracy_history}
+        save_obj(state_skopt, state_skopt_filename)
+
+        if valid_accuracy > valid_best_accuracy:
+            valid_best_accuracy = valid_accuracy
+
+            print('Checkpointing new best model...')
+            path_best_model = os.path.join(
+                this_cfg.output_dir, 'best_model.pth')
+            path_checkpoint_state = os.path.join(
+                this_cfg.output_dir, 'checkpoint_state.pth.tar')
+            shutil.copy(path_best_model, cfg.output_dir)
+            shutil.copy(path_checkpoint_state, cfg.output_dir)
+
+    maxpos = skopt_accuracy_history.index(max(skopt_accuracy_history))
+    print(os.path.join(cfg.output_dir, 'iter_' + str(maxpos)))
+    print(skopt_accuracy_history)

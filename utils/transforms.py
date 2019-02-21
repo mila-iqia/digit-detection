@@ -18,7 +18,7 @@ class FirstCrop(object):
         Parameters
         ----------
         pad_size : float
-            Percentage of padding around the bounding boxe containg
+            Percentage of padding around the bounding boxe containing
             all digits. Should be in range [0, 1].
 
         '''
@@ -69,7 +69,7 @@ class Rescale(object):
 
     def __init__(self, output_size):
         '''
-        Rescale the image in a sample to a given size.s
+        Rescale the image in a sample to a given size.
 
         Parameters
         ----------
@@ -123,6 +123,70 @@ class Rescale(object):
                     'filename': filename}
 
         sample_trans = {'image': image_scaled, 'metadata': metadata}
+
+        return sample_trans
+
+
+class CenterCrop(object):
+
+    def __init__(self, output_size):
+        '''
+        Crop randomly the image in a sample.
+
+        Parameters
+        ----------
+        output_size: tuple or int
+            Desired output size. If int, square crop
+            is made.
+
+        '''
+        assert isinstance(output_size, (int, tuple))
+        if isinstance(output_size, int):
+            self.output_size = (output_size, output_size)
+        else:
+            assert len(output_size) == 2
+            self.output_size = output_size
+
+    def __call__(self, sample):
+        '''
+
+        Parameters
+        ----------
+        sample : dict
+            dict with ['image', 'metadata'] keys.
+
+        Returns
+        -------
+        sample_trans : dict
+            Modified image and associated metadata corresponding to the
+            transformation.
+
+        '''
+
+        image = sample['image']
+        labels = sample['metadata']['labels']
+        boxes = sample['metadata']['boxes']
+        filename = sample['metadata']['filename']
+
+        h, w = np.asarray(image).shape[:2]
+        new_h, new_w = self.output_size
+
+        top = int(round((h - new_h) / 2.))
+        left = int(round((w - new_w) / 2.))
+
+        image_cropped = image.crop((left, top, left + new_w, top + new_h))
+
+        boxes[:, 0:2] -= left
+        boxes[:, 2:] -= top
+
+        boxes[:, :2] = np.clip(boxes[:, :2], 0, new_w - 1)
+        boxes[:, 2:] = np.clip(boxes[:, 2:], 0, new_h - 1)
+
+        metadata = {'boxes': boxes,
+                    'labels': labels,
+                    'filename': filename}
+
+        sample_trans = {'image': image_cropped, 'metadata': metadata}
 
         return sample_trans
 
@@ -217,7 +281,7 @@ class ToTensor(object):
         filename = sample['metadata']['filename']
 
         image = np.asarray(image)
-        image = image - np.mean(image)
+        # image = image - np.mean(image)
         assert image.shape == (54, 54, 3)
 
         # swap color axis
@@ -251,5 +315,44 @@ class ToTensor(object):
         sample_tensor = {'image': image,
                          'target': target,
                          'filename': filename}
+
+        return sample_tensor
+
+
+class Normalize(object):
+
+    def __init__(self, mean, std):
+        '''
+        Crop randomly the image in a sample.
+
+        Parameters
+        ----------
+        mean : sequence
+            Sequence of means for each channel.
+        std : sequence
+            Sequence of standard deviations for each channel.
+
+        '''
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, sample_tensor):
+        '''
+
+        Parameters
+        ----------
+        sample_tensor : dict
+            dict with ['image', 'target', 'filename'] keys.
+
+        Returns
+        -------
+        sample_tensor : dict
+            Normalize tensor image and associated metadata..
+
+        '''
+        mean = torch.tensor(self.mean, dtype=torch.float32)
+        std = torch.tensor(self.std, dtype=torch.float32)
+        sample_tensor['image'].sub_(
+            mean[:, None, None]).div_(std[:, None, None])
 
         return sample_tensor

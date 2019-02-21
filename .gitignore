@@ -1,15 +1,14 @@
 *.DS_Store
+*.err
 *.ipynb
 *.ipynb_checkpoints
-
+*.out
+*.m
+*.mat
+*.pth
 *.pyc
 *.swp
-*.pth
-*.mat
-*.m
 *.tar.gz
-*.err
-*.out
 *.txt
 
 # Ignore pipfiles
@@ -17,3 +16,5 @@ Pip*
 
 results/*
 data/*
+
+*/__pycache__/*

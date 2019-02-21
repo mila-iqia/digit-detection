@@ -2,66 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class ConvNet(nn.Module):
-
-    def __init__(self, num_classes=2):
-        '''
-        Convolutional Neural Network.
-
-        Parameters
-        ----------
-        num_classes : int
-            Number of classes for the output of the network.
-
-        '''
-
-        super(ConvNet, self).__init__()
-
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=5, stride=1, padding=2),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2))
-
-        self.fc = nn.Linear(4608, num_classes)
-
-    def forward(self, x):
-        '''
-        Forward path.
-
-        Parameters
-        ----------
-        x : ndarray
-            Input to the network.
-
-        Returns
-        -------
-        x : ndarray
-            Output to the network.
-
-        '''
-        out = self.layer1(x)
-        out = self.layer2(out)
-        out = self.layer3(out)
-        # Flatten based on batch size
-        out = out.reshape(out.size(0), -1)
-        out = self.fc(out)
-        return out
-
-
-class BaselineCNN(nn.Module):  # Achieves ~91%
+class BaselineCNN(nn.Module):
 
     def __init__(self, num_classes):
         '''
@@ -125,17 +66,14 @@ class BaselineCNN_dropout(nn.Module):
     def forward(self, x):
         '''
         Forward path.
-
         Parameters
         ----------
         x : ndarray
             Input to the network.
-
         Returns
         -------
         x : ndarray
             Output to the network.
-
         '''
 
         x = self.pool(F.relu(self.conv1(x)))

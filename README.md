@@ -1,7 +1,6 @@
 # Door Number Detection Project
 
-This repository contains the code necessary for the door number detection
-project.
+This repository contains the code for the door number detection project.
 
 The goal of the project is to help blind persons to find their way around by
 making sure they are at the right house when they want for example visit a
@@ -14,17 +13,22 @@ case of a mobile application), etc.
 
 ## Quick usage on Helios
 
-To run the code on Helios, you can use the scripts in `scrips/helios/train_on_helios.sh`. 
+To run the code on Helios, you can use the scripts in
+`scrips/helios/train_on_helios.sh`.
 
-You can run this directly from the login node using msub: 
+You can run this directly from the login node using msub:
 
 `msub -A $GROUP_RAP -l feature=k80,nodes=1:gpus=1,walltime=2:00:00 scripts/helios/train_on_helios.sh`
 
 You can easily add this script to a `.pbs` file with your specific settings.
 
-To change the data directories, you can modify the `train_on_helios.sh` script. To change configurations during training, use the `config/base_config.yml` file. This contains tuneable options that can be useful.
+To change the data directories, you can modify the `train_on_helios.sh`
+script. To change configurations during training, use the
+`config/base_config.yml` file. This contains tuneable options that can be
+useful.
 
 ## Dependencies (For local setups)
+
 
 ### Use conda to manage your environments
 
@@ -44,7 +48,8 @@ Some resources that can be useful:
 We strongly recommend that you start with our preconfigured
 environment by using the provided `envs/environment.yml` file by running in your
 terminal from the root directory `conda env create -f envs/environment.yml`.
-If you have a mac use the `envs/mac-environment.yml` file. You can also use the provided `Pipfile` if you prefer using `pipenv`.
+If you have a mac use the `envs/mac-environment.yml` file.
+You can also use the provided Pipfile if you prefer using pipenv.
 
 Note:
 - To activate the created environment, type
