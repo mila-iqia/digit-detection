@@ -33,6 +33,6 @@ else
 fi
 
 # Run training
-python $ROOT_DIR'/train.py' --cfg $CFG --metadata_filename=$METADATA_FILENAME --dataset_dir=$DATA_DIR'/train' --results_dir=$RESULTS_DIR
+python $ROOT_DIR'/train_v1.py' --cfg $CFG --metadata_filename=$METADATA_FILENAME --dataset_dir=$DATA_DIR'/train' --results_dir=$RESULTS_DIR
 
 echo "Finish training..."

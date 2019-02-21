@@ -3,59 +3,54 @@ import os
 from PIL import Image
 from torch.utils import data
 
+from collections import OrderedDict
 import numpy as np
+
 import torch
-
 from torchvision import transforms
-from torch.utils.data import DataLoader
+from torch.utils.data import sampler, DataLoader
 
-from utils.transforms import FirstCrop, Rescale, RandomCrop, ToTensor
+from utils.transforms import (
+        CenterCrop, FirstCrop, Normalize, Rescale, RandomCrop, ToTensor)
 from utils.misc import load_obj
 from utils.boxes import extract_labels_boxes
 
 
 class SVHNDataset(data.Dataset):
+    '''SVHN Dataset.'''
 
-    def __init__(self, metadata, data_dir, transform=None):
+    def __init__(self, root, train=True, transform=None):
         '''
         Initialize the Dataset.
 
         Parameters
         ----------
-        metadata : dict
-        Each key in metadata will contain a filename and all associated
-        metadata. The filename is with respect to the directory it's in,
-        and metadata contains four 5 fields:
-        * `label` - which lists all digits present in image, in order
-        * `height`,`width`,`top`,`left` which list the corresponding pixel
-        information about the digits bounding boxes.
-
-        {0: {'filename': '1.png',
-        'metadata': {'height': [219, 219],
-        'label': [1, 9],
-        'left': [246, 323],
-        'top': [77, 81],
-        'width': [81, 96]}},
-        1: {'filename': '2.png',
-        'metadata': {'height': [32, 32],
-        'label': [2, 3],
-        'left': [77, 98],
-        'top': [29, 25],
-        'width': [23, 26]}}, ...
-
-        data_dir : str
+        root : str
             Directory with all the images.
+        train: bool
+            If true, use the train set otherwise use the test set.
         transform : callable, optional
             Optional transform to be applied on a sample.
 
         '''
-        self.metadata = metadata
-        self.data_dir = data_dir
+
+        self.root = root
+        self.train = train
         self.transform = transform
+
+        if self.train:
+            metadata = load_obj(os.path.join(root, 'train_metadata.pkl'))
+            metadata = OrderedDict(metadata)
+
+        else:
+            metadata = load_obj(os.path.join(root, 'test_metadata.pkl'))
+            metadata = OrderedDict(metadata)
+
+        self.metadata = metadata
 
     def __len__(self):
         '''
-        Evaluate the length of the dataset object
+        Evaluate the length of the dataset object.
 
         Returns
         -------
@@ -67,7 +62,7 @@ class SVHNDataset(data.Dataset):
 
     def __getitem__(self, index):
         '''
-        Get an indexed item from the dataset and return it.
+        Get an indexed item from the dataset and renerates one sample of data.
 
         Parameters
         ----------
@@ -84,9 +79,12 @@ class SVHNDataset(data.Dataset):
 
 
         '''
-        'Generates one sample of data'
+        if self.train:
+            split = 'train'
+        else:
+            split = 'test'
 
-        img_name = os.path.join(self.data_dir,
+        img_name = os.path.join(self.root, split,
                                 self.metadata[index]['filename'])
 
         # Load data and get raw metadata (labels & boxes)
@@ -101,39 +99,122 @@ class SVHNDataset(data.Dataset):
 
         if self.transform:
             sample = self.transform(sample)
-
         return sample
 
 
-def prepare_dataloaders(dataset_split,
-                        dataset_path,
-                        metadata_filename,
-                        batch_size=32,
-                        sample_size=-1,
-                        valid_split=0.8):
+class ChunkSampler(sampler.Sampler):
+    '''Samples elements sequentially from some offset and eventually
+    shuffle them.
+
     '''
-    Utility function to prepare dataloaders for training.
+    def __init__(self, num_samples, start=0, shuffle=False):
+        '''
+        Parameters
+        ----------
+        num_samples: int
+            # of desired datapoints
+        start: int
+            Offset where we should start selecting from
+        shuffle: bool.
+            If True, shuffle the samples.
+
+        '''
+        self.num_samples = num_samples
+        self.start = start
+        self.indices = range(self.start, self.start + self.num_samples)
+        self.shuffle = shuffle
+
+    def __iter__(self):
+        '''
+        Iterate over the offset.
+
+        Returns
+        -------
+        int
+            An indice.
+        '''
+        if self.shuffle:
+            return iter(np.random.permutation(self.indices))
+        else:
+            return iter(self.indices)
+
+    def __len__(self):
+        '''
+        Evaluate the length of the offset.
+
+        Returns
+        -------
+        int
+            The length of the offset.
+
+        '''
+        return len(self.indices)
+
+
+def find_mean_std_per_channel(input_dir, valid_split, transform, sample_size):
+    '''
+    Find the mean and std per channel of training images for normalization.
+    '''
+    train_dataset = SVHNDataset(root=input_dir,
+                                train=True,
+                                transform=transform)
+
+    if sample_size != -1:
+        train_num_samples = int((1 - valid_split) * sample_size)
+    else:
+        train_num_samples = int((1 - valid_split) * len(train_dataset))
+
+    train_loader = DataLoader(train_dataset,
+                              sampler=ChunkSampler(
+                                num_samples=train_num_samples,
+                                start=0,
+                                shuffle=False),
+                              batch_size=1,
+                              shuffle=False,
+                              num_workers=4)
+
+    img_mean = []
+    img_std = []
+    for i, batch in enumerate(train_loader):
+        inputs, _ = batch['image'], batch['target']
+        x = inputs.data.cpu().numpy()[0]
+        img_mean.append(x.reshape((x.shape[0], -1)).mean(axis=1))
+        img_std.append(x.reshape((x.shape[0], -1)).std(axis=1))
+
+    images_mean = np.array(img_mean).mean(0)
+    images_std = np.array(img_std).std(0)
+    print('Images mean: {}'.format(tuple(images_mean)))
+    print('Images std: {}'.format(tuple(images_std)))
+    return images_mean, images_std
+
+
+def prepare_dataloaders(input_dir, valid_split, batch_size,
+                        sample_size=-1, train=True):
+    '''
+    Prepare the dataloader.
 
     Parameters
     ----------
-    dataset_split : str
-        Any of 'train', 'extra', 'test'.
-    dataset_path : str
-        Absolute path to the dataset. (i.e. .../data/SVHN/train')
-    metadata_filename : str
-        Absolute path to the metadata pickle file.
-    batch_size : int
-        Mini-batch size.
+    input_dir : str
+        Directory with all the images.
+    train: bool
+        If true, use the train set otherwise use the test set.
+        Default True.
     sample_size : int
         Number of elements to use as sample size,
         for debugging purposes only. If -1, use all samples.
+        Default -1.
     valid_split : float
         Returns a validation split of %size; valid_split*100,
         valid_split should be in range [0,1].
+        Default 0.2.
+    batch_size : int
+        Mini-batch size.
+        Default 32.
 
     Returns
     -------
-    if dataset_split in ['train', 'extra']:
+    if dataset_split in ['train']:
         train_loader: torch.utils.DataLoader
             Dataloader containing training data.
         valid_loader: torch.utils.DataLoader
@@ -145,67 +226,101 @@ def prepare_dataloaders(dataset_split,
 
     '''
 
-    assert dataset_split in ['train', 'test', 'extra'], "check dataset_split"
-
-    metadata = load_obj(metadata_filename)
-
-    #  dataset_path = datadir / dataset_split
-
+    # Define transformations
     firstcrop = FirstCrop(0.3)
     rescale = Rescale((64, 64))
     random_crop = RandomCrop((54, 54))
+    center_crop = CenterCrop((54, 54))
     to_tensor = ToTensor()
 
-    # Declare transformations
+    # Set basic transform
+    train_transform = [firstcrop, rescale, random_crop, to_tensor]
+    test_transform = [firstcrop, rescale, center_crop, to_tensor]
 
-    transform = transforms.Compose([firstcrop,
-                                    rescale,
-                                    random_crop,
-                                    to_tensor])
+    # Find mean and std per channel for normalization
+    images_mean, images_std = find_mean_std_per_channel(
+        input_dir, valid_split,
+        transforms.Compose(test_transform), sample_size)
 
-    dataset = SVHNDataset(metadata,
-                          data_dir=dataset_path,
-                          transform=transform)
+    # Define normalization
+    normalize = Normalize(tuple(images_mean), tuple(images_std))
 
-    indices = np.arange(len(metadata))
-    #  indices = np.random.permutation(indices)
+    # Data augmentation and normalization for training
+    # Just normalization for test and validation
+    train_transform.append(normalize)
+    test_transform.append(normalize)
+    data_transforms = {
+        'train': transforms.Compose(
+            train_transform),
+        'test': transforms.Compose(
+            test_transform)
+        }
 
-    # Only use a sample amount of data
-    if sample_size != -1:
-        indices = indices[:sample_size]
+    if train:
+        # Train dataset
+        train_dataset = SVHNDataset(root=input_dir,
+                                    train=True,
+                                    transform=data_transforms['train'])
+        # Validation dataset
+        valid_dataset = SVHNDataset(root=input_dir,
+                                    train=True,
+                                    transform=data_transforms['test'])
 
-    if dataset_split in ['train', 'extra']:
+        if sample_size != -1:
+            train_num_samples = int((1 - valid_split) * sample_size)
+            valid_num_samples = sample_size - train_num_samples
+        else:
+            train_num_samples = int((1 - valid_split) * len(train_dataset))
+            valid_num_samples = len(train_dataset) - train_num_samples
 
-        train_idx = indices[:round(valid_split*len(indices))]
-        valid_idx = indices[round(valid_split*len(indices)):]
+        print('# of train examples: {}'.format(train_num_samples))
+        print('# of valid examples: {}'.format(valid_num_samples))
 
-        train_sampler = torch.utils.data.SubsetRandomSampler(train_idx)
-        valid_sampler = torch.utils.data.SubsetRandomSampler(valid_idx)
-
-        # Prepare a train and validation dataloader
-        train_loader = DataLoader(dataset,
-                                  batch_size=batch_size,
-                                  shuffle=False,
-                                  num_workers=4,
-                                  sampler=train_sampler)
-
-        valid_loader = DataLoader(dataset,
-                                  batch_size=batch_size,
-                                  shuffle=False,
-                                  num_workers=4,
-                                  sampler=valid_sampler)
+        # Train dataset loader
+        train_loader = DataLoader(
+            train_dataset,
+            sampler=ChunkSampler(
+                num_samples=train_num_samples,
+                start=0,
+                shuffle=True),
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4)
+        # Validation dataset loader
+        valid_loader = DataLoader(
+            valid_dataset,
+            sampler=ChunkSampler(
+                num_samples=valid_num_samples,
+                start=train_num_samples,
+                shuffle=False),
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4)
 
         return train_loader, valid_loader
 
-    elif dataset_split in ['test']:
+    else:
+        # Test dataset
+        test_dataset = SVHNDataset(root=input_dir,
+                                   train=False,
+                                   transform=data_transforms['test'])
 
-        test_sampler = torch.utils.data.SequentialSampler(indices)
+        if sample_size != -1:
+            test_num_samples = sample_size
+        else:
+            test_num_samples = len(test_dataset)
 
-        # Prepare a test dataloader
-        test_loader = DataLoader(dataset,
-                                 batch_size=batch_size,
-                                 num_workers=4,
-                                 shuffle=False,
-                                 sampler=test_sampler)
+        print('# of test examples: {}'.format(test_num_samples))
+
+        # Test dataset loader
+        test_loader = DataLoader(
+            test_dataset,
+            sampler=ChunkSampler(
+                num_samples=test_num_samples,
+                start=0,
+                shuffle=False),
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4)
 
         return test_loader

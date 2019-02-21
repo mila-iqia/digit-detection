@@ -1,5 +1,5 @@
-skopt: False
-config_name: 'BaselineCNN'
+skopt: True
+config_name: 'BaselineCNN_skopt'
 dataset_name: SVHN
 seed: 1234
 
@@ -15,10 +15,9 @@ model:
   model: 'BaselineCNN'
   num_classes: 7
 
-
 # Hyperparameters of the optimizer
 optimizer:
-  lr: 0.001
+  lr: "Real(10**-4, 10**-2, 'log-uniform')"
   momentum: 0.9  # does not work for now
 
 # Hyperparameters related to model training
