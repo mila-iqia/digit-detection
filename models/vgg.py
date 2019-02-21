@@ -15,15 +15,19 @@ cfg = {
 
 
 class VGG(nn.Module):
-    def __init__(self, vgg_name, num_classes):
+    def __init__(self, vgg_name, num_classes=7, classify=True):
         super(VGG, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
-        self.classifier = nn.Linear(512, num_classes)
+        self.classify = classify
+        if self.classify:
+
+            self.classifier = nn.Linear(512, num_classes)
 
     def forward(self, x):
         out = self.features(x)
         out = out.view(out.size(0), -1)
-        out = self.classifier(out)
+        if self.classify:
+            out = self.classifier(out)
         return out
 
     def _make_layers(self, cfg):
