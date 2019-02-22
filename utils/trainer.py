@@ -83,7 +83,7 @@ def define_model(model_cfg, device, model_state=None):
     elif model_cfg.model == 'MultiLoss':
         base_net = VGG('VGG11', classify=False)
         model = MultiLoss(base_net, FC_Layer)
-        # TODO add multiloss variable
+        # TODO add cfg.multiloss variable
     else:
         raise Exception('The model specified is not avaiable.')
 
@@ -127,16 +127,43 @@ def define_train_cfg(train_cfg, train_state=None):
     return train_cfg
 
 
+def array_to_housenumber(housenum_array):
+
+    '''
+    Convert an array (like predictions and targets) to their number
+    equivalent.
+
+    returns an ndarray.
+    '''
+    house_numbers = []
+
+    for idx, seq_len in enumerate(housenum_array[:, 0]):
+
+        # Get only predicted sequence as single number
+        house_number_arr = housenum_array[idx, 1:seq_len+1]
+        if seq_len == 0:
+            # Network predicts no house number
+            house_number = -1
+        else:
+            house_number = int("".join(house_number_arr.astype(str)))
+        house_numbers.append(house_number)
+
+    # Convert to ndarray
+    house_numbers = np.asarray(house_numbers)
+    return house_numbers
+
+
 def batch_loop(loader, model, optimizer, loss_function, device, train=True,
                multiloss=True):
-    loss = 0
+
+    tot_loss = 0
     n_iter = 0
     correct = 0
     n_samples = 0
-    total_preds = []
-    total_targets = []
+
     for i, batch in enumerate(tqdm(loader)):
         # get the inputs
+        loss = 0
         inputs, targets = batch['image'], batch['target']
         inputs = inputs.to(device)
         target_ndigits = targets[:, 0].long()
@@ -150,6 +177,7 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
         outputs = model(inputs)
 
         # Iterate through each target and compute the loss
+        batch_preds = []
         if multiloss:
 
             for index in range(targets.shape[1]):
@@ -159,10 +187,11 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
                 loss += loss_function(pred, target)
 
                 _, predicted = torch.max(pred.data, 1)
-                total_preds.append(predicted)
-            total_preds = torch.stack(total_preds)  # Combine all results to one tensor
-            total_preds = total_preds.transpose(1, 0)  # Get same shape as target
-            total_targets.append(targets)
+                batch_preds.append(predicted)
+            batch_preds = torch.stack(batch_preds)  # Combine all results to one tensor
+            batch_preds = batch_preds.transpose(1, 0)  # Get same shape as target
+            batch_preds = batch_preds.cpu().numpy().astype('int')
+            batch_targets = targets.cpu().numpy().astype('int')
 
         else:
             loss = loss_function(outputs, target_ndigits)
@@ -174,12 +203,24 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
             optimizer.step()
 
         # Statistics
-        loss += loss.item()
+        tot_loss += loss.item()
         n_iter += 1
-        _, predicted = torch.max(outputs.data, 1)
-        correct += (predicted == target_ndigits).sum().item()
-        n_samples += target_ndigits.size(0)
 
-    loss = loss / n_iter
+        n_samples += targets.size(0)
+
+        if multiloss:
+            predicted_house_numbers = array_to_housenumber(batch_preds)
+            target_house_numbers = array_to_housenumber(batch_targets)
+
+            correct += np.sum(
+                target_house_numbers == predicted_house_numbers)
+
+        else:
+            _, predicted = torch.max(outputs.data, 1)
+            correct += (predicted == target_ndigits).sum().item()
+
+    epoch_loss = tot_loss / n_iter
     accuracy = correct / n_samples
-    return loss, accuracy
+    return epoch_loss, accuracy
+
+
