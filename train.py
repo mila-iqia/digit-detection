@@ -34,7 +34,7 @@ def parse_args():
                                  training.''')
 
     parser.add_argument('--dataset_dir', type=str,
-                        default='data/SVHN',
+                        default='data/SVHN/train',
                         help='''Absolute path to the data directory to
                                 be used for training.''')
 

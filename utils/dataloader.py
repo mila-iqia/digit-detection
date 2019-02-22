@@ -19,13 +19,13 @@ from utils.boxes import extract_labels_boxes
 class SVHNDataset(data.Dataset):
     '''SVHN Dataset.'''
 
-    def __init__(self, root, metadata_filename, train=True, transform=None):
+    def __init__(self, data_dir, metadata_filename, train=True, transform=None):
         '''
         Initialize the Dataset.
 
         Parameters
         ----------
-        root : str
+        data_dir : str
             Directory with all the images.
         train: bool
             If true, use the train set otherwise use the test set.
@@ -34,7 +34,7 @@ class SVHNDataset(data.Dataset):
 
         '''
 
-        self.root = root
+        self.data_dir = data_dir
         self.train = train
         self.transform = transform
 
@@ -74,12 +74,12 @@ class SVHNDataset(data.Dataset):
 
 
         '''
-        if self.train:
-            split = 'train'
-        else:
-            split = 'test'
+        #  if self.train:
+        #      split = 'train'
+        #  else:
+        #      split = 'test'
 
-        img_name = os.path.join(self.root, split,
+        img_name = os.path.join(self.data_dir,
                                 self.metadata[index]['filename'])
 
         # Load data and get raw metadata (labels & boxes)
@@ -150,7 +150,7 @@ def find_mean_std_per_channel(input_dir, metadata_filename, valid_split, transfo
     '''
     Find the mean and std per channel of training images for normalization.
     '''
-    train_dataset = SVHNDataset(root=input_dir,
+    train_dataset = SVHNDataset(data_dir=input_dir,
                                 metadata_filename=metadata_filename,
                                 train=True,
                                 transform=transform)
@@ -256,12 +256,12 @@ def prepare_dataloaders(input_dir, metadata_filename, valid_split, batch_size,
 
     if train:
         # Train dataset
-        train_dataset = SVHNDataset(root=input_dir,
+        train_dataset = SVHNDataset(data_dir=input_dir,
                                     metadata_filename=metadata_filename,
                                     train=True,
                                     transform=data_transforms['train'])
         # Validation dataset
-        valid_dataset = SVHNDataset(root=input_dir,
+        valid_dataset = SVHNDataset(data_dir=input_dir,
                                     metadata_filename=metadata_filename,
                                     train=True,
                                     transform=data_transforms['test'])
@@ -301,7 +301,7 @@ def prepare_dataloaders(input_dir, metadata_filename, valid_split, batch_size,
 
     else:
         # Test dataset
-        test_dataset = SVHNDataset(root=input_dir,
+        test_dataset = SVHNDataset(data_dir=input_dir,
                                    metadata_filename=metadata_filename,
                                    train=False,
                                    transform=data_transforms['test'])
