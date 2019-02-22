@@ -10,6 +10,7 @@ from tqdm import tqdm
 from models.baselines import BaselineCNN, BaselineCNN_dropout
 from models.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
 from models.vgg import VGG
+from models.multiloss import FC_Layer, MultiLoss
 
 
 def load_state_dict(filename, device):
@@ -79,6 +80,9 @@ def define_model(model_cfg, device, model_state=None):
         model = ResNet152(num_classes)
     elif model_cfg == 'VGG':
         model = VGG(num_classes)
+    elif model_cfg == 'MultiLoss':
+        base_net = VGG('VGG11', classify=False)
+        model = MultiLoss(base_net, FC_Layer)
     else:
         raise Exception('The model specified is not avaiable.')
 
