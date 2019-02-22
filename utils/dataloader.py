@@ -19,7 +19,7 @@ from utils.boxes import extract_labels_boxes
 class SVHNDataset(data.Dataset):
     '''SVHN Dataset.'''
 
-    def __init__(self, root, train=True, transform=None):
+    def __init__(self, root, metadata_filename, train=True, transform=None):
         '''
         Initialize the Dataset.
 
@@ -38,13 +38,8 @@ class SVHNDataset(data.Dataset):
         self.train = train
         self.transform = transform
 
-        if self.train:
-            metadata = load_obj(os.path.join(root, 'train_metadata.pkl'))
-            metadata = OrderedDict(metadata)
-
-        else:
-            metadata = load_obj(os.path.join(root, 'test_metadata.pkl'))
-            metadata = OrderedDict(metadata)
+        metadata = load_obj(metadata_filename)
+        metadata = OrderedDict(metadata)
 
         self.metadata = metadata
 
@@ -151,11 +146,12 @@ class ChunkSampler(sampler.Sampler):
         return len(self.indices)
 
 
-def find_mean_std_per_channel(input_dir, valid_split, transform, sample_size):
+def find_mean_std_per_channel(input_dir, metadata_filename, valid_split, transform, sample_size):
     '''
     Find the mean and std per channel of training images for normalization.
     '''
     train_dataset = SVHNDataset(root=input_dir,
+                                metadata_filename=metadata_filename,
                                 train=True,
                                 transform=transform)
 
@@ -188,7 +184,7 @@ def find_mean_std_per_channel(input_dir, valid_split, transform, sample_size):
     return images_mean, images_std
 
 
-def prepare_dataloaders(input_dir, valid_split, batch_size,
+def prepare_dataloaders(input_dir, metadata_filename, valid_split, batch_size,
                         sample_size=-1, train=True):
     '''
     Prepare the dataloader.
@@ -239,7 +235,9 @@ def prepare_dataloaders(input_dir, valid_split, batch_size,
 
     # Find mean and std per channel for normalization
     images_mean, images_std = find_mean_std_per_channel(
-        input_dir, valid_split,
+        input_dir,
+        metadata_filename,
+        valid_split,
         transforms.Compose(test_transform), sample_size)
 
     # Define normalization
@@ -259,10 +257,12 @@ def prepare_dataloaders(input_dir, valid_split, batch_size,
     if train:
         # Train dataset
         train_dataset = SVHNDataset(root=input_dir,
+                                    metadata_filename=metadata_filename,
                                     train=True,
                                     transform=data_transforms['train'])
         # Validation dataset
         valid_dataset = SVHNDataset(root=input_dir,
+                                    metadata_filename=metadata_filename,
                                     train=True,
                                     transform=data_transforms['test'])
 
@@ -302,6 +302,7 @@ def prepare_dataloaders(input_dir, valid_split, batch_size,
     else:
         # Test dataset
         test_dataset = SVHNDataset(root=input_dir,
+                                   metadata_filename=metadata_filename,
                                    train=False,
                                    transform=data_transforms['test'])
 

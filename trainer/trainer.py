@@ -77,7 +77,7 @@ def train(cfg):
 
     # Data
     train_loader, valid_loader = prepare_dataloaders(
-        cfg.input_dir, cfg.dataloader.valid_split,
+        cfg.input_dir, cfg.metadata_filename, cfg.dataloader.valid_split,
         cfg.dataloader.batch_size, cfg.dataloader.sample_size,)
 
     # Model

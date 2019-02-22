@@ -51,6 +51,8 @@ def load_config(args):
 
     cfg = cfg_from_file(args.cfg)
 
+    cfg.metadata_filename = args.metadata_filename
+
     cfg.input_dir = args.dataset_dir
     cfg.output_dir = os.path.join(
         args.results_dir,
