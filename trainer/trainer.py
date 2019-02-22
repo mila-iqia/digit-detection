@@ -93,7 +93,8 @@ def train(cfg):
     print(optimizer)
 
     # Loss
-    loss_function = define_loss()
+    # TODO change multiloss with cfg.multiloss
+    loss_function = define_loss(multiloss=True)
 
     # Training
     train_cfg = define_train_cfg(cfg.train, state.train)
