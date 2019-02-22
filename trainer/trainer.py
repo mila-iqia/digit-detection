@@ -102,7 +102,7 @@ def train(cfg):
     # Iterate over epochs
     for epoch in range(train_cfg.starting_epoch, train_cfg.num_epochs):
 
-        print('Iterating over training data...')
+        print('\n\n\nIterating over training data...')
         model.train()
         train_loss, train_accuracy = batch_loop(
             train_loader, model, optimizer,
