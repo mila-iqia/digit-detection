@@ -78,11 +78,12 @@ def define_model(model_cfg, device, model_state=None):
         model = ResNet101(num_classes)
     elif model_cfg.model == ' ResNet152':
         model = ResNet152(num_classes)
-    elif model_cfg == 'VGG':
+    elif model_cfg.model == 'VGG':
         model = VGG(num_classes)
-    elif model_cfg == 'MultiLoss':
+    elif model_cfg.model == 'MultiLoss':
         base_net = VGG('VGG11', classify=False)
         model = MultiLoss(base_net, FC_Layer)
+        # TODO add multiloss variable
     else:
         raise Exception('The model specified is not avaiable.')
 
@@ -100,8 +101,13 @@ def define_optimizer(optim_cfg, model_param, device, optim_state=None):
     return optimizer
 
 
-def define_loss():
-    loss_function = torch.nn.CrossEntropyLoss()
+def define_loss(multiloss):
+
+    # TODO replace multiloss with cfg.multiloss
+    if multiloss:
+        loss_function = torch.nn.CrossEntropyLoss(ignore_index=-1)
+    else:
+        loss_function = torch.nn.CrossEntropyLoss()
     return loss_function
 
 
@@ -121,11 +127,14 @@ def define_train_cfg(train_cfg, train_state=None):
     return train_cfg
 
 
-def batch_loop(loader, model, optimizer, loss_function, device, train=True):
+def batch_loop(loader, model, optimizer, loss_function, device, train=True,
+               multiloss=True):
     loss = 0
     n_iter = 0
     correct = 0
     n_samples = 0
+    total_preds = []
+    total_targets = []
     for i, batch in enumerate(tqdm(loader)):
         # get the inputs
         inputs, targets = batch['image'], batch['target']
@@ -139,7 +148,24 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True):
 
         # Forward
         outputs = model(inputs)
-        loss = loss_function(outputs, target_ndigits)
+
+        # Iterate through each target and compute the loss
+        if multiloss:
+
+            for index in range(targets.shape[1]):
+                target = targets[:, index].long()
+                target = target.to(device)
+                pred = outputs[index]
+                loss += loss_function(pred, target)
+
+                _, predicted = torch.max(pred.data, 1)
+                total_preds.append(predicted)
+            total_preds = torch.stack(total_preds)  # Combine all results to one tensor
+            total_preds = total_preds.transpose(1, 0)  # Get same shape as target
+            total_targets.append(targets)
+
+        else:
+            loss = loss_function(outputs, target_ndigits)
 
         if train:
             # Backward
