@@ -12,6 +12,7 @@ import skopt
 import shutil
 import time
 import yaml
+from tensorboardX import SummaryWriter
 
 import torch
 
@@ -92,6 +93,9 @@ def train(cfg):
     print('Using optimizer:')
     print(optimizer)
 
+    # TensorboardX
+    writer = SummaryWriter(log_dir=cfg.output_dir)
+
     # Loss
     # TODO change multiloss with cfg.multiloss
     loss_function = define_loss(multiloss=True)
@@ -125,6 +129,11 @@ def train(cfg):
         print('\tTrain Accuracy: {:.4f}'.format(train_accuracy))
         print('\tValid Loss: {:.4f}'.format(valid_loss))
         print('\tValid Accuracy: {:.4f}'.format(valid_accuracy))
+
+        writer.add_scalar('data/train_loss', train_loss, epoch)
+        writer.add_scalar('data/train_accuracy', train_accuracy, epoch)
+        writer.add_scalar('data/valid_loss', valid_loss, epoch)
+        writer.add_scalar('data/valid_accuracy', valid_loss, epoch)
 
         # Early stopping and checkpointing best model
         if valid_accuracy > train_cfg.valid_best_accuracy:
