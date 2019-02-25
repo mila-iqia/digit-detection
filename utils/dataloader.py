@@ -74,12 +74,8 @@ class SVHNDataset(data.Dataset):
 
 
         '''
-        #  if self.train:
-        #      split = 'train'
-        #  else:
-        #      split = 'test'
 
-        img_name = os.path.join(self.data_dir,
+        img_name = os.path.join(self.data_dir, self.metadata[index]['split'],
                                 self.metadata[index]['filename'])
 
         # Load data and get raw metadata (labels & boxes)
