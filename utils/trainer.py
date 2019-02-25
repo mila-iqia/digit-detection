@@ -160,6 +160,7 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
     n_iter = 0
     correct = 0
     n_samples = 0
+    per_branch_correct = np.zeros((6))
 
     for i, batch in enumerate(tqdm(loader)):
         # get the inputs
@@ -178,6 +179,7 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
 
         # Iterate through each target and compute the loss
         batch_preds = []
+
         if multiloss:
 
             for index in range(targets.shape[1]):
@@ -215,12 +217,19 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
             correct += np.sum(
                 target_house_numbers == predicted_house_numbers)
 
+            per_branch_correct += np.sum(batch_preds == batch_targets, axis=0)
+
         else:
             _, predicted = torch.max(outputs.data, 1)
             correct += (predicted == target_ndigits).sum().item()
 
     epoch_loss = tot_loss / n_iter
     accuracy = correct / n_samples
+
+    if multiloss:
+        per_branch_accuracy = per_branch_correct / n_samples
+        print("Accuracy per branch", per_branch_accuracy)
+
     return epoch_loss, accuracy
 
 
