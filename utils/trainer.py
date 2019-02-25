@@ -115,7 +115,7 @@ def define_train_cfg(train_cfg, train_state=None):
     if not train_state:
         train_cfg.starting_epoch = 0
         train_cfg.patience = 0
-        train_cfg.max_patience = 3
+        train_cfg.max_patience = 8
         train_cfg.train_loss_history = []
         train_cfg.train_accuracy_history = []
         train_cfg.valid_loss_history = []

@@ -138,6 +138,8 @@ def train(cfg):
                             model, optimizer, train_cfg)
 
         else:
+            # Number of epochs to accept that validation
+            # score hasnt increased
             train_cfg.patience += 1
 
         if train_cfg.patience > train_cfg.max_patience:
