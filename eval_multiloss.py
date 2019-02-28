@@ -12,7 +12,7 @@ from trainer.trainer import batch_loop
 def eval_model(dataset_dir, metadata_filename, model_filename,
                batch_size, sample_size):
 
-    test_loader = prepare_dataloaders(dataset_dir, metadata_filename, batch_size, sample_size=100, train=False, )
+    test_loader = prepare_dataloaders(dataset_dir, metadata_filename, batch_size, sample_size=-1, train=False, )
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print("Device used: ", device)
 
