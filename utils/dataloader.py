@@ -180,8 +180,10 @@ def find_mean_std_per_channel(input_dir, metadata_filename, valid_split, transfo
     return images_mean, images_std
 
 
-def prepare_dataloaders(input_dir, metadata_filename, valid_split, batch_size,
-                        sample_size=-1, train=True):
+def prepare_dataloaders(input_dir, metadata_filename, batch_size,
+                        valid_split=0.2,
+                        sample_size=-1,
+                        train=True):
     '''
     Prepare the dataloader.
 

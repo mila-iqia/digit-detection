@@ -78,8 +78,11 @@ def train(cfg):
 
     # Data
     train_loader, valid_loader = prepare_dataloaders(
-        cfg.input_dir, cfg.metadata_filename, cfg.dataloader.valid_split,
-        cfg.dataloader.batch_size, cfg.dataloader.sample_size,)
+        cfg.input_dir,
+        cfg.metadata_filename,
+        cfg.dataloader.batch_size,
+        cfg.dataloader.valid_split,
+        cfg.dataloader.sample_size)
 
     # Model
     model = define_model(cfg.model, device, state.model)
