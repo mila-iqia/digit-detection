@@ -153,14 +153,17 @@ def array_to_housenumber(housenum_array):
     return house_numbers
 
 
-def batch_loop(loader, model, optimizer, loss_function, device, train=True,
-               multiloss=True):
+def batch_loop(loader, model, optimizer, loss_function, device,
+               multiloss=True, mode='training'):
+
+    assert mode in ['training', 'validation', 'testing'], "mode can only be 'training' or 'testing'"
 
     tot_loss = 0
     n_iter = 0
     correct = 0
     n_samples = 0
     per_branch_correct = np.zeros((6))
+    total_predicted_house_numbers = []
 
     for i, batch in enumerate(tqdm(loader)):
         # get the inputs
@@ -170,7 +173,7 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
         target_ndigits = targets[:, 0].long()
         target_ndigits = target_ndigits.to(device)
 
-        if train:
+        if mode == 'training':
             # Zero the gradient buffer
             optimizer.zero_grad()
 
@@ -186,7 +189,9 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
                 target = targets[:, index].long()
                 target = target.to(device)
                 pred = outputs[index]
-                loss += loss_function(pred, target)
+
+                if mode in ['training', 'validation']:
+                    loss += loss_function(pred, target)
 
                 _, predicted = torch.max(pred.data, 1)
                 batch_preds.append(predicted)
@@ -196,16 +201,20 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
             batch_targets = targets.cpu().numpy().astype('int')
 
         else:
-            loss = loss_function(outputs, target_ndigits)
+            if mode in ['training', 'validation']:
+                loss = loss_function(outputs, target_ndigits)
 
-        if train:
+        if mode == 'training':
             # Backward
             loss.backward()
             # Optimize
             optimizer.step()
 
         # Statistics
-        tot_loss += loss.item()
+
+        if mode in ['training', 'validation']:
+            tot_loss += loss.item()
+
         n_iter += 1
 
         n_samples += targets.size(0)
@@ -219,6 +228,8 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
 
             per_branch_correct += np.sum(batch_preds == batch_targets, axis=0)
 
+            total_predicted_house_numbers.extend(predicted_house_numbers)
+
         else:
             _, predicted = torch.max(outputs.data, 1)
             correct += (predicted == target_ndigits).sum().item()
@@ -230,6 +241,10 @@ def batch_loop(loader, model, optimizer, loss_function, device, train=True,
         per_branch_accuracy = per_branch_correct / n_samples
         print("Accuracy per branch", per_branch_accuracy)
 
-    return epoch_loss, accuracy
+    if mode in ['training', 'validation']:
 
+        return epoch_loss, accuracy
 
+    elif mode == 'testing':
+
+        return accuracy, total_predicted_house_numbers

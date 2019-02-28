@@ -232,12 +232,17 @@ def prepare_dataloaders(input_dir, metadata_filename, batch_size,
     test_transform = [firstcrop, rescale, center_crop, to_tensor]
 
     # Find mean and std per channel for normalization
-    images_mean, images_std = find_mean_std_per_channel(
-        input_dir,
-        metadata_filename,
-        valid_split,
-        transforms.Compose(test_transform), sample_size)
+    if train:
+        images_mean, images_std = find_mean_std_per_channel(
+            input_dir,
+            metadata_filename,
+            valid_split,
+            transforms.Compose(test_transform), sample_size)
 
+    else:
+        # obtained from training set, avoids having to load it unnecessarily
+        images_mean = (109.7994, 110.00522, 114.33739)
+        images_std = (12.675092, 12.741672, 11.369844)
     # Define normalization
     normalize = Normalize(tuple(images_mean), tuple(images_std))
 

@@ -113,13 +113,13 @@ def train(cfg):
         model.train()
         train_loss, train_accuracy = batch_loop(
             train_loader, model, optimizer,
-            loss_function, device, train=True)
+            loss_function, device, mode='training')
 
         print('Iterating over validation data...')
         model.eval()
         valid_loss, valid_accuracy = batch_loop(
             valid_loader, model, optimizer,
-            loss_function, device, train=False)
+            loss_function, device, mode='validation')
 
         # Keep trace of train/valid loss history and valid accuracy
         train_cfg.train_loss_history.append(train_loss)
