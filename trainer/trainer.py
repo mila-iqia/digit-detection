@@ -19,7 +19,7 @@ import torch
 from utils.config import parse_dict, generate_config
 from utils.dataloader import prepare_dataloaders
 from utils.misc import mkdir_p, save_obj, load_obj
-from utils.trainer import (
+from trainer.utils import (
     load_state_dict, save_state_dict, set_seed,
     define_model, define_optimizer, define_loss,
     define_train_cfg, batch_loop

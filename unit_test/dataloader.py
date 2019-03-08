@@ -9,7 +9,7 @@ import unittest
 import torch
 
 from utils.dataloader import prepare_dataloaders
-from utils.trainer import set_seed
+from trainer.utils import set_seed
 
 
 class TestDataloader(unittest.TestCase):
