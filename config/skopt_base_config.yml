@@ -1,5 +1,5 @@
 skopt: True
-config_name: 'BaselineCNN_skopt'
+config_name: 'TestMultiloss_skopt'
 dataset_name: SVHN
 seed: 1234
 
@@ -7,19 +7,20 @@ seed: 1234
 dataloader:
   train: True
   valid_split: 0.2
-  sample_size: 100 # Number of samples to use (for debugging purposes), set to -1 to use the entire dataset
+  sample_size: 1000 # Number of samples to use (for debugging purposes), set to -1 to use the entire dataset
   batch_size: 32
 
 # Hyperparameters of the model
 model:
-  model: 'BaselineCNN'
+  model: 'MultiLoss'
   num_classes: 7
+
 
 # Hyperparameters of the optimizer
 optimizer:
-  lr: "Real(10**-4, 10**-2, 'log-uniform')"
+  lr: 0.001
   momentum: 0.9  # does not work for now
 
 # Hyperparameters related to model training
 train:
-  num_epochs: 100
+  num_epochs: 25

@@ -1,5 +1,5 @@
 skopt: False
-config_name: 'TestMultilossJP'
+config_name: 'TestMultiloss'
 dataset_name: SVHN
 seed: 1234
 
