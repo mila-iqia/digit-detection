@@ -1,32 +1,41 @@
 import torch
 import torch.nn as nn
 
-from models.vgg import VGG
-
 
 class FC_Layer(nn.Module):
 
-    '''
-    Base class that uses a single fully connected layer to
-    calculate the multiloss functions of the network
-    '''
-
     def __init__(self, in_features, out_features):
         '''
-        n_digits module. This network predicts the number
-        of digits in an image.
-
+        Base class that uses a single fully connected layer to
+        calculate the multiloss functions of the network.
 
         Parameters
         ----------
-        n_input : int
-            number of
+        in_features : int
+            Number of of input features. (e.g., size of the feature map)
+        out_features : int
+            Number of output features. (e.g., number of classes)
+
         '''
 
         super(FC_Layer, self).__init__()
         self.fc = nn.Linear(in_features, out_features)
 
     def forward(self, x):
+        '''
+        Forward path.
+
+        Parameters
+        ----------
+        x : ndarray
+            Input to the network.
+
+        Returns
+        -------
+        x : ndarray
+            Output to the network.
+
+        '''
 
         x = self.fc(x)
 
@@ -34,13 +43,20 @@ class FC_Layer(nn.Module):
 
 
 class MultiLoss(nn.Module):
-    '''
 
-    base_net : a nn.Module instance with a forward method implemented.
-
-    FCLayer : a nn.Module class for the fully connected layers.
-    '''
     def __init__(self, base_net, FCLayer):
+        '''
+        Correspond to the n_digits module. This network predicts the
+        number of digits in an image.
+
+        Parameters
+        ----------
+        base_net : nn.Module
+            Instance network with a forward method implemented.
+        FCLayer : nn.Module
+            Class network for the fully connected layers.
+
+        '''
 
         super(MultiLoss, self).__init__()
         self.base_net = base_net
@@ -49,13 +65,28 @@ class MultiLoss(nn.Module):
 
         self.fc_layers = torch.nn.ModuleList()
 
+        # corresponds to the n_digits module.
         out_dims = [7, 10, 10, 10, 10, 10]
         for out_dim in out_dims:
-
             fc_layer = FCLayer(self.in_dim, out_dim)
             self.fc_layers.append(fc_layer)
 
     def forward(self, x):
+        '''
+        Forward path.
+
+        Parameters
+        ----------
+        x : ndarray
+            Input to the network.
+
+        Returns
+        -------
+        preds : list
+            Output to the network. List of ndarray containing the
+            predictions of the different tasks.
+
+        '''
 
         preds = []
         features = self.base_net(x)
@@ -65,18 +96,3 @@ class MultiLoss(nn.Module):
             preds.append(fc_layer(features))
 
         return preds
-
-
-def test_multiloss():
-    base_net = VGG('VGG11', classify=False)
-
-    model = MultiLoss(base_net, FC_Layer)
-    x = torch.randn(2, 3, 32, 32)
-    y = model(x)
-
-    print(y)
-
-
-if __name__ == "__main__":
-    test_multiloss()
-    print("Success!")
