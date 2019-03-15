@@ -1,4 +1,5 @@
-'''VGG11/13/16/19 in Pytorch.
+'''
+VGG11/13/16/19 in Pytorch.
 
 Source: https://github.com/kuangliu/pytorch-cifar/blob/master/models/vgg.py
 '''
