@@ -14,6 +14,23 @@ from models.multiloss import FC_Layer, MultiLoss
 
 
 def load_state_dict(filename, device):
+    '''
+    Load the dictionary containing the state of training.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the file where the state dictionary is save.
+
+    device : str
+        The device that is used. In ['cuda:0', 'cpu'].
+
+    Returns
+    -------
+    state : dict
+        Dictionary containing the state of training.
+
+    '''
     if device == 'cuda:0':
         state = torch.load(filename)
     else:
@@ -26,6 +43,23 @@ def load_state_dict(filename, device):
 
 
 def save_state_dict(filename, device, model, optimizer, train_cfg):
+    '''
+    Save the dictionary containing the state of training.
+
+    Parameters
+    ----------
+    filename : str
+        Path to the file where the state dictionary will be save.
+    device : str
+        The device that is used. In ['cuda:0', 'cpu']
+    model : obj
+        The model that we want to save the state.
+    optimizer : obj
+        The optimizer that we want to save the state.
+    train_cfg: dict
+        The dictionary containing training configuration and state.
+
+    '''
     state = EasyDict(defaultdict(dict))
     state.seed = {'np_state': np.random.get_state(),
                   'random_state': random.getstate(),
@@ -41,6 +75,16 @@ def save_state_dict(filename, device, model, optimizer, train_cfg):
 
 
 def set_seed(seed):
+    '''
+    Set the seed.
+
+    Parameters
+    ----------
+    seed : int or dict.
+        If int the seed to be used.
+        If dict contain all seed state that need to be fixed.
+
+    '''
     if isinstance(seed, int):
         np.random.seed(seed)
         random.seed(seed)
@@ -63,6 +107,24 @@ def set_seed(seed):
 
 
 def define_model(model_cfg, device, model_state=None):
+    '''
+    Define the model to be used.
+
+    Parameters
+    ----------
+    model_cfg : dict
+        Dictionary containing the config of the model.
+    device : str
+        The device that is used. In ['cuda:0', 'cpu']
+    model_state : dict
+        The state of the model to be load. Default: None.
+
+    Returns
+    -------
+    model : obj
+        The model object.
+
+    '''
     num_classes = model_cfg.num_classes
     if model_cfg.model == 'BaselineCNN':
         model = BaselineCNN(num_classes)
@@ -83,7 +145,6 @@ def define_model(model_cfg, device, model_state=None):
     elif model_cfg.model == 'MultiLoss':
         base_net = VGG('VGG11', classify=False)
         model = MultiLoss(base_net, FC_Layer)
-        # TODO add cfg.multiloss variable
     else:
         raise Exception('The model specified is not avaiable.')
 
@@ -94,6 +155,26 @@ def define_model(model_cfg, device, model_state=None):
 
 
 def define_optimizer(optim_cfg, model_param, device, optim_state=None):
+    '''
+    Define the optimizer to be used.
+
+    Parameters
+    ----------
+    optim_cfg : dict
+        Dictionary containing the config of the optimizer.
+    model_param : dict
+        The parameters of the model to optimize.
+    device : str
+        The device that is used. In ['cuda:0', 'cpu']
+    optim_state : dict
+        The state of the optimizer to be load. Default: None.
+
+    Returns
+    -------
+    optimizer : obj
+        The optimizer object.
+
+    '''
     optimizer = torch.optim.SGD(
         model_param, lr=optim_cfg.lr)  # , momentum=optim_cfg.momentum)
     if optim_state:
@@ -102,8 +183,15 @@ def define_optimizer(optim_cfg, model_param, device, optim_state=None):
 
 
 def define_loss(multiloss):
+    '''
+    Define the loss.
 
-    # TODO replace multiloss with cfg.multiloss
+    Returns
+    -------
+    loss_function : function
+        The loss function.
+
+    '''
     if multiloss:
         loss_function = torch.nn.CrossEntropyLoss(ignore_index=-1)
     else:
@@ -112,6 +200,23 @@ def define_loss(multiloss):
 
 
 def define_train_cfg(train_cfg, train_state=None):
+    '''
+    Define the training config.
+
+    Parameters
+    ----------
+    train_cfg : dict
+        The dictionaty containing the training config.
+    train_state : dict
+        Dictionary containing the config and the state of the training loop.
+        Default None.
+
+    Returns
+    -------
+    train_cfg : dict
+        Dictionary containing the config and the state of the training loop.
+
+    '''
     if not train_state:
         train_cfg.starting_epoch = 0
         train_cfg.patience = 0
@@ -130,10 +235,20 @@ def define_train_cfg(train_cfg, train_state=None):
 def array_to_housenumber(housenum_array):
 
     '''
-    Convert an array (like predictions and targets) to their number
+    Convert an ndarray (like predictions and targets) to their number
     equivalent.
 
-    returns an ndarray.
+    Parameters
+    ----------
+    housenum_array : ndarray
+        ndarray containing the predictions and targets for the
+        multi-loss model.
+
+    Returns
+    -------
+    house_numbers : ndarray
+        ndarray containing the house number.
+
     '''
     house_numbers = []
 
@@ -155,8 +270,43 @@ def array_to_housenumber(housenum_array):
 
 def batch_loop(loader, model, optimizer, loss_function, device,
                multiloss=True, mode='training'):
+    '''
+    Define the mini-batch loop.
 
-    assert mode in ['training', 'validation', 'testing'], "mode can only be 'training' or 'testing'"
+    Parameters
+    ----------
+    loader : obj
+        The dataloader to iterate.
+    model : obj
+        The model to use.
+    optimizer : obj
+        The optimizer to use.
+    loss_function : function
+        The loss function to use.
+    device : str
+        The device that is used. In ['cuda:0', 'cpu']
+    multiloss = bool
+        If true compute the multi-loss.
+    mode : str
+        The mode to use. In ['training', 'validation', 'testing']
+
+    Returns
+    -------
+    if mode in ['training', 'validation']:
+        epoch_loss : float
+            The loss.
+        accuracy : float.
+            The accuracy.
+    elif mode == 'testing':
+        accuracy : float.
+            The accuracy.
+        total_predicted_house_numbers : list
+            List containing the predicted house number.
+
+    '''
+
+    assert mode in ['training', 'validation', 'testing'], \
+        "mode can only be 'training' or 'testing'"
 
     tot_loss = 0
     n_iter = 0
@@ -166,7 +316,7 @@ def batch_loop(loader, model, optimizer, loss_function, device,
     total_predicted_house_numbers = []
 
     for i, batch in enumerate(tqdm(loader)):
-        # get the inputs
+        # Get the inputs
         loss = 0
         inputs, targets = batch['image'], batch['target']
         inputs = inputs.to(device)
@@ -195,8 +345,10 @@ def batch_loop(loader, model, optimizer, loss_function, device,
 
                 _, predicted = torch.max(pred.data, 1)
                 batch_preds.append(predicted)
-            batch_preds = torch.stack(batch_preds)  # Combine all results to one tensor
-            batch_preds = batch_preds.transpose(1, 0)  # Get same shape as target
+            # Combine all results to one tensor
+            batch_preds = torch.stack(batch_preds)
+            # Get same shape as target
+            batch_preds = batch_preds.transpose(1, 0)
             batch_preds = batch_preds.cpu().numpy().astype('int')
             batch_targets = targets.cpu().numpy().astype('int')
 
@@ -211,7 +363,6 @@ def batch_loop(loader, model, optimizer, loss_function, device,
             optimizer.step()
 
         # Statistics
-
         if mode in ['training', 'validation']:
             tot_loss += loss.item()
 
