@@ -18,8 +18,8 @@ model:
 
 # Hyperparameters of the optimizer
 optimizer:
-  lr: 0.001
-  momentum: 0.9  # does not work for now
+  lr: "Real(10**-4, 10**-2, 'log-uniform')"
+  momentum: 0.9
 
 # Hyperparameters related to model training
 train:

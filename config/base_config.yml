@@ -19,7 +19,7 @@ model:
 # Hyperparameters of the optimizer
 optimizer:
   lr: 0.001
-  momentum: 0.9  # does not work for now
+  momentum: 0.9
 
 # Hyperparameters related to model training
 train:
