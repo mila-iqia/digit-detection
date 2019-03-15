@@ -150,6 +150,29 @@ def find_mean_std_per_channel(
             valid_split, transform, sample_size):
     '''
     Find the mean and std per channel of training images for normalization.
+
+    Parameters
+    ----------
+    input_dir : str
+        Directory with all the images.
+    valid_split : float
+        Returns a validation split of %size; valid_split*100,
+        valid_split should be in range [0,1].
+        Default 0.2.
+    transform : transforms.Compose([transform1, ..., transformx])
+        A set of transformation to apply to the samples.
+    sample_ size : int
+        Number of elements to use as sample size,
+        for debugging purposes only. If -1, use all samples.
+        Default -1.
+
+    Returns
+    -------
+    images_mean : tuple
+        Tuple containing the mean of a set of samples per channel.
+    images_std : tuple
+        Tuple containing the std of a set of samples per channel.
+
     '''
     train_dataset = SVHNDataset(data_dir=input_dir,
                                 metadata_filename=metadata_filename,
