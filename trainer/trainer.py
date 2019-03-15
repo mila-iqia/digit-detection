@@ -180,7 +180,7 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
 
     '''
     Do a Bayesian hyperparameter optimization.
-    This code is inspired by Francis Dutil code.
+    This code was inspired by Francis Dutil work.
 
     Parameters
     ----------
