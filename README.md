@@ -25,7 +25,8 @@ You can easily add this script to a `.pbs` file with your specific settings.
 
 To change the data directories, you can modify the`train_on_helios.sh` script.
 To change configurations during training, use the `config/base_config.yml` file.
-This contains tuneable options that can be useful.
+This contains tuneable options that can be useful. To use skopt bayesian
+hyperparameter optimisation use the `config/skopt_base_config.yml` file.
 
 To modify the models used, modify the appropriate model declaration in
 `trainer/trainer.py`. Currently, VGG and Resnet as well as simple
