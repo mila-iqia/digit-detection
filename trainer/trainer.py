@@ -68,7 +68,7 @@ def train(cfg):
         cfg.seed = state.seed
 
     else:
-        # save config
+        # Save config
         with open(cfg_filename, 'w') as f:
             yaml.dump(cfg, f, default_flow_style=False)
         print('No checkpoint available...')
@@ -100,7 +100,6 @@ def train(cfg):
     writer = SummaryWriter(log_dir=cfg.output_dir)
 
     # Loss
-    # TODO change multiloss with cfg.multiloss
     loss_function = define_loss(multiloss=True)
 
     # Training
@@ -170,7 +169,9 @@ def train(cfg):
     torch.save(best_model, model_filename)
     print('Best model saved to :', model_filename)
 
-    return train_cfg.valid_best_accuracy
+    valid_best_accuracy = train_cfg.valid_best_accuracy
+
+    return valid_best_accuracy
 
 
 def train_skopt(cfg, n_iter=10, base_estimator='GP',
@@ -179,6 +180,7 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
 
     '''
     Do a Bayesian hyperparameter optimization.
+    This code is inspired by Francis Dutil code.
 
     Parameters
     ----------
@@ -198,9 +200,6 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
     train_function : object
         The trainig procedure to optimize. The function should take
         a dict as input and return a metric to maximize.
-
-    Returns
-    -------
 
     '''
 
