@@ -6,14 +6,10 @@ from utils.boxes import extract_outer_box
 
 class FirstCrop(object):
 
-    '''
-    Crop the image such that all bounding boxes +pad_size% in x,y are
-    contained in the image.
-
-    '''
-
     def __init__(self, pad_size):
         '''
+        Crop the image such that all bounding boxes +pad_size% in x,y are
+        contained in the image.
 
         Parameters
         ----------
@@ -256,10 +252,10 @@ class RandomCrop(object):
 
 
 class ToTensor(object):
-    """Convert ndarrays in sample to Tensors."""
 
     def __call__(self, sample):
         '''
+        Convert ndarrays in sample to Tensors.
 
         Parameters
         ----------
