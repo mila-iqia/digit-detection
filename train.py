@@ -29,9 +29,8 @@ def parse_args():
 
     parser.add_argument("--metadata_filename", type=str,
                         default='data/SVHN/train_metadata.pkl',
-                        help='''metadata_filename will be the absolute
-                                 path to the directory to be used for
-                                 training.''')
+                        help='''Absolute path to the directory to be
+                                used for training.''')
 
     parser.add_argument('--dataset_dir', type=str,
                         default='data/SVHN',
