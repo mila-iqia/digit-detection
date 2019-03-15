@@ -7,6 +7,12 @@ class BaselineCNN(nn.Module):
     def __init__(self, num_classes):
         '''
         Placeholder CNN
+
+        Parameters
+        ----------
+        num_classes : int
+            Number of classes.
+
         '''
         super(BaselineCNN, self).__init__()
 
@@ -50,6 +56,14 @@ class BaselineCNN_dropout(nn.Module):
     def __init__(self, num_classes, p=0.5):
         '''
         Placeholder CNN
+
+        Parameters
+        ----------
+        num_classes : int
+            Number of classes.
+        p : float
+            Percentage of dropout to be used for the hidden layer.
+
         '''
         super(BaselineCNN_dropout, self).__init__()
 
@@ -70,10 +84,12 @@ class BaselineCNN_dropout(nn.Module):
         ----------
         x : ndarray
             Input to the network.
+
         Returns
         -------
         x : ndarray
             Output to the network.
+
         '''
 
         x = self.pool(F.relu(self.conv1(x)))
