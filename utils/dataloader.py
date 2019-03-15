@@ -6,7 +6,6 @@ from torch.utils import data
 from collections import OrderedDict
 import numpy as np
 
-import torch
 from torchvision import transforms
 from torch.utils.data import sampler, DataLoader
 
@@ -17,16 +16,19 @@ from utils.boxes import extract_labels_boxes
 
 
 class SVHNDataset(data.Dataset):
-    '''SVHN Dataset.'''
 
-    def __init__(self, data_dir, metadata_filename, train=True, transform=None):
+    def __init__(
+                self, data_dir, metadata_filename,
+                train=True, transform=None):
         '''
-        Initialize the Dataset.
+        SVHN Dataset.
 
         Parameters
         ----------
         data_dir : str
             Directory with all the images.
+        metadata_filename: str
+            Path to the metadata_filename.
         train: bool
             If true, use the train set otherwise use the test set.
         transform : callable, optional
@@ -94,12 +96,12 @@ class SVHNDataset(data.Dataset):
 
 
 class ChunkSampler(sampler.Sampler):
-    '''Samples elements sequentially from some offset and eventually
-    shuffle them.
 
-    '''
     def __init__(self, num_samples, start=0, shuffle=False):
         '''
+        Samples elements sequentially from some offset and eventually
+        shuffle them.
+
         Parameters
         ----------
         num_samples: int
@@ -123,6 +125,7 @@ class ChunkSampler(sampler.Sampler):
         -------
         int
             An indice.
+
         '''
         if self.shuffle:
             return iter(np.random.permutation(self.indices))
@@ -142,7 +145,9 @@ class ChunkSampler(sampler.Sampler):
         return len(self.indices)
 
 
-def find_mean_std_per_channel(input_dir, metadata_filename, valid_split, transform, sample_size):
+def find_mean_std_per_channel(
+            input_dir, metadata_filename,
+            valid_split, transform, sample_size):
     '''
     Find the mean and std per channel of training images for normalization.
     '''
@@ -191,20 +196,21 @@ def prepare_dataloaders(input_dir, metadata_filename, batch_size,
     ----------
     input_dir : str
         Directory with all the images.
-    train: bool
-        If true, use the train set otherwise use the test set.
-        Default True.
-    sample_size : int
-        Number of elements to use as sample size,
-        for debugging purposes only. If -1, use all samples.
-        Default -1.
+    metadata_filename: str
+            Path to the metadata_filename.
+    batch_size : int
+        Mini-batch size.
     valid_split : float
         Returns a validation split of %size; valid_split*100,
         valid_split should be in range [0,1].
         Default 0.2.
-    batch_size : int
-        Mini-batch size.
-        Default 32.
+    sample_size : int
+        Number of elements to use as sample size,
+        for debugging purposes only. If -1, use all samples.
+        Default -1.
+    train: bool
+        If true, use the train set otherwise use the test set.
+        Default True.
 
     Returns
     -------
@@ -240,7 +246,7 @@ def prepare_dataloaders(input_dir, metadata_filename, batch_size,
             transforms.Compose(test_transform), sample_size)
 
     else:
-        # obtained from training set, avoids having to load it unnecessarily
+        # Obtained from training set, avoids having to load it unnecessarily
         images_mean = (109.7994, 110.00522, 114.33739)
         images_std = (12.675092, 12.741672, 11.369844)
     # Define normalization
