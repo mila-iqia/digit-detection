@@ -65,8 +65,23 @@ def load_config(args):
 
 def parse_dict(d_, prefix='', lst=[]):
     '''
-    Helper function to help us sparse the yaml config file.
-    Find the keys in the config dict that are to be optimized.
+    Function to sparse the yaml config file. Find the keys in the
+    config dict that are to be optimized.
+
+    Parameters
+    ----------
+    d_ : dict
+        Object which can be edict.
+    prefix : str
+        Prefix. Default: start with ''.
+    lst : list
+        List of keys to be optimized. Default: start with[].
+
+    Returns
+    -------
+    lst : list
+        List of keys to be optimized.
+
     '''
     if isinstance(d_, dict):
         for key in d_.keys():
@@ -86,7 +101,17 @@ def parse_dict(d_, prefix='', lst=[]):
 
 def set_key(dic, key, value):
     '''
-    Aux function to set the value of a key in a dict
+    Aux function to set the value of a key in a dict.
+
+    Parameters
+    ----------
+    dic : dict
+        Config dictionary.
+    key : str
+        Config key.
+    value : float
+        Config value.
+
     '''
     k1 = key.split(".")
     k1 = list(filter(lambda l: len(l) > 0, k1))
@@ -97,6 +122,25 @@ def set_key(dic, key, value):
 
 
 def generate_config(config, keys, new_values):
+    '''
+    Generate a new config from the config containing hyper-parameters to
+    optimize.
+
+    Parameters
+    ----------
+    config : dict
+        Config dictionary.
+    keys : str
+        Config keys.
+    new_values :
+        Config new values.
+
+    Returns
+    -------
+    new_config : dict
+        New config dictionary.
+
+    '''
     new_config = copy.deepcopy(config)
     for i, key in enumerate(list(keys.keys())):
         set_key(new_config, key, new_values[i])
