@@ -273,25 +273,22 @@ class ToTensor(object):
 
         image = sample['image']
         labels = sample['metadata']['labels']
-        # boxes = sample['metadata']['boxes']
         filename = sample['metadata']['filename']
 
         image = np.asarray(image)
-        # image = image - np.mean(image)
+        # Input normalization
+        image = image - np.mean(image)
         assert image.shape == (54, 54, 3)
 
-        # swap color axis
+        # Swap color axis
         # numpy image: H x W x C
         # torch image: C X H X W
         image = image.transpose((2, 0, 1))
         image = torch.from_numpy(image).float()
 
-        # TODO
-        # Process boxes
-
         labels = np.asarray(labels)
 
-        # target is a 1x6 vector, where [0] is the number of digits and
+        # Target is a 1x6 vector, where [0] is the number of digits and
         # targets[1:targets[0]] is the digit sequence.
         # i.e. the sequence 157 is represented by target [3,1,5,5,7,-1,-1]
         target = -np.ones(6)
@@ -311,44 +308,5 @@ class ToTensor(object):
         sample_tensor = {'image': image,
                          'target': target,
                          'filename': filename}
-
-        return sample_tensor
-
-
-class Normalize(object):
-
-    def __init__(self, mean, std):
-        '''
-        Crop randomly the image in a sample.
-
-        Parameters
-        ----------
-        mean : sequence
-            Sequence of means for each channel.
-        std : sequence
-            Sequence of standard deviations for each channel.
-
-        '''
-        self.mean = mean
-        self.std = std
-
-    def __call__(self, sample_tensor):
-        '''
-
-        Parameters
-        ----------
-        sample_tensor : dict
-            dict with ['image', 'target', 'filename'] keys.
-
-        Returns
-        -------
-        sample_tensor : dict
-            Normalize tensor image and associated metadata..
-
-        '''
-        mean = torch.tensor(self.mean, dtype=torch.float32)
-        std = torch.tensor(self.std, dtype=torch.float32)
-        sample_tensor['image'].sub_(
-            mean[:, None, None]).div_(std[:, None, None])
 
         return sample_tensor

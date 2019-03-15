@@ -10,7 +10,7 @@ from torchvision import transforms
 from torch.utils.data import sampler, DataLoader
 
 from utils.transforms import (
-        CenterCrop, FirstCrop, Normalize, Rescale, RandomCrop, ToTensor)
+        CenterCrop, FirstCrop, Rescale, RandomCrop, ToTensor)
 from utils.misc import load_obj
 from utils.boxes import extract_labels_boxes
 
@@ -145,71 +145,6 @@ class ChunkSampler(sampler.Sampler):
         return len(self.indices)
 
 
-def find_mean_std_per_channel(
-            input_dir, metadata_filename,
-            valid_split, transform, sample_size):
-    '''
-    Find the mean and std per channel of training images for normalization.
-
-    Parameters
-    ----------
-    input_dir : str
-        Directory with all the images.
-    metadata_filename: str
-            Path to the metadata_filename.
-    valid_split : float
-        Returns a validation split of %size; valid_split*100,
-        valid_split should be in range [0,1].
-        Default 0.2.
-    transform : transforms.Compose([transform1, ..., transformx])
-        A set of transformation to apply to the samples.
-    sample_ size : int
-        Number of elements to use as sample size,
-        for debugging purposes only. If -1, use all samples.
-        Default -1.
-
-    Returns
-    -------
-    images_mean : tuple
-        Tuple containing the mean of a set of samples per channel.
-    images_std : tuple
-        Tuple containing the std of a set of samples per channel.
-
-    '''
-    train_dataset = SVHNDataset(data_dir=input_dir,
-                                metadata_filename=metadata_filename,
-                                train=True,
-                                transform=transform)
-
-    if sample_size != -1:
-        train_num_samples = int((1 - valid_split) * sample_size)
-    else:
-        train_num_samples = int((1 - valid_split) * len(train_dataset))
-
-    train_loader = DataLoader(train_dataset,
-                              sampler=ChunkSampler(
-                                num_samples=train_num_samples,
-                                start=0,
-                                shuffle=False),
-                              batch_size=1,
-                              shuffle=False,
-                              num_workers=4)
-
-    img_mean = []
-    img_std = []
-    for i, batch in enumerate(train_loader):
-        inputs, _ = batch['image'], batch['target']
-        x = inputs.data.cpu().numpy()[0]
-        img_mean.append(x.reshape((x.shape[0], -1)).mean(axis=1))
-        img_std.append(x.reshape((x.shape[0], -1)).std(axis=1))
-
-    images_mean = np.array(img_mean).mean(0)
-    images_std = np.array(img_std).std(0)
-    print('Images mean: {}'.format(tuple(images_mean)))
-    print('Images std: {}'.format(tuple(images_std)))
-    return images_mean, images_std
-
-
 def prepare_dataloaders(input_dir, metadata_filename, batch_size,
                         valid_split=0.2,
                         sample_size=-1,
@@ -256,31 +191,13 @@ def prepare_dataloaders(input_dir, metadata_filename, batch_size,
     rescale = Rescale((64, 64))
     random_crop = RandomCrop((54, 54))
     center_crop = CenterCrop((54, 54))
-    to_tensor = ToTensor()
+    to_tensor = ToTensor()  # Include normalization of the input
 
     # Set basic transform
     train_transform = [firstcrop, rescale, random_crop, to_tensor]
+    # Just normalization for test and validation
     test_transform = [firstcrop, rescale, center_crop, to_tensor]
 
-    # Find mean and std per channel for normalization
-    if train:
-        images_mean, images_std = find_mean_std_per_channel(
-            input_dir,
-            metadata_filename,
-            valid_split,
-            transforms.Compose(test_transform), sample_size)
-
-    else:
-        # Obtained from training set, avoids having to load it unnecessarily
-        images_mean = (109.7994, 110.00522, 114.33739)
-        images_std = (12.675092, 12.741672, 11.369844)
-    # Define normalization
-    normalize = Normalize(tuple(images_mean), tuple(images_std))
-
-    # Data augmentation and normalization for training
-    # Just normalization for test and validation
-    train_transform.append(normalize)
-    test_transform.append(normalize)
     data_transforms = {
         'train': transforms.Compose(
             train_transform),
