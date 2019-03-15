@@ -155,6 +155,8 @@ def find_mean_std_per_channel(
     ----------
     input_dir : str
         Directory with all the images.
+    metadata_filename: str
+            Path to the metadata_filename.
     valid_split : float
         Returns a validation split of %size; valid_split*100,
         valid_split should be in range [0,1].
