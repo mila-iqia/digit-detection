@@ -16,7 +16,7 @@ cfg = {
     'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256,
               'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
     'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512,
-              512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
+              512, 512, 512, 'M', 512, 512, 512, 512, 'M']
 }
 
 
@@ -31,13 +31,16 @@ class VGG(nn.Module):
             The type of VGG. In ['VGG11', 'VGG13', 'VGG16', 'VGG19']
         num_classes : int
             Number of classes in the output of the model.
+        classify : bool
+            If True use it as a classifier otherwise use it as a
+            a base network (feature extractor).
 
         '''
         super(VGG, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
+
         self.classify = classify
         if self.classify:
-
             self.classifier = nn.Linear(512, num_classes)
 
     def forward(self, x):
@@ -88,7 +91,47 @@ class VGG(nn.Module):
 
 def test():
     '''Test the VGG class.'''
+    print('Test VGG11')
     net = VGG('VGG11', num_classes=7)
-    x = torch.randn(2, 3, 32, 32)
+    x = torch.randn(2, 3, 54, 54)
     y = net(x)
     print(y.size())
+
+    print('Classify is False')
+    net = VGG('VGG11', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+    print('Test VGG13')
+    net = VGG('VGG13', num_classes=7)
+    y = net(x)
+    print(y.size())
+
+    print('Classify is False')
+    net = VGG('VGG13', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+    print('Test VGG16')
+    net = VGG('VGG16', num_classes=7)
+    y = net(x)
+    print(y.size())
+
+    print('Classify is False')
+    net = VGG('VGG16', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+    print('Test VGG19')
+    net = VGG('VGG19', num_classes=7)
+    y = net(x)
+    print(y.size())
+
+    print('Classify is False')
+    net = VGG('VGG19', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+
+if __name__ == '__main__':
+    test()
