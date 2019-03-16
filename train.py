@@ -28,7 +28,7 @@ def parse_args():
                         help='Mendatory config file.')
 
     parser.add_argument("--metadata_filename", type=str,
-                        default='data/SVHN/train_metadata.pkl',
+                        default='data/SVHN/train_metadata_split.pkl',
                         help='''Absolute path to the directory to be
                                 used for training.''')
 
