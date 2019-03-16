@@ -12,6 +12,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+cfg = {
+    'ResNet18': [2, 2, 2, 2],
+    'ResNet34': [3, 4, 6, 3],
+    'ResNet50': [3, 4, 6, 3],
+    'ResNet101': [3, 4, 23, 3],
+    'ResNet152': [3, 8, 36, 3],
+}
+
+
 class BasicBlock(nn.Module):
     expansion = 1
 
@@ -132,24 +141,32 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, num_blocks, num_classes):
+
+    def __init__(self, resnet_name, num_classes, classify=True):
         '''
         Base class for ResNet.
 
         Parameters
         ----------
-        block : nn.module
-            nn.module of the type of block you want in the ResNet model.
-            Option here are `BasicBlock` usually used in ResNet 18 and 34
-            and `Bottleneck` block usually used in ResNet 50, 101 and 152.
-        num_blocks : list
-            List of 4 int containing the number of block per ResNet
-            layer.
-        num_classes: int
+        resnet_name : str
+            The type of ResNet. In ['ResNet18', 'ResNet34', 'ResNet50',
+            'ResNet101', 'ResNet152']
+        num_classes : int
             Number of classes in the output of the model.
+        classify : bool
+            If True use it as a classifier otherwise use it as a
+            a base network (feature extractor).
 
         '''
         super(ResNet, self).__init__()
+
+        if resnet_name in ['ResNet18', 'ResNet34']:
+            block = BasicBlock
+        elif resnet_name in ['ResNet50', 'ResNet101', 'ResNet152']:
+            block = Bottleneck
+
+        num_blocks = cfg[resnet_name]
+
         self.in_planes = 64
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
@@ -159,7 +176,10 @@ class ResNet(nn.Module):
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
-        self.linear = nn.Linear(512 * block.expansion, num_classes)
+
+        self.classify = classify
+        if self.classify:
+            self.classifier = nn.Linear(512 * block.expansion, num_classes)
 
     def _make_layer(self, block, planes, num_blocks, stride):
         '''
@@ -213,82 +233,67 @@ class ResNet(nn.Module):
         out = self.layer4(out)
         out = F.avg_pool2d(out, 4)
         out = out.view(out.size(0), -1)
-        out = self.linear(out)
+        if self.classify:
+            out = self.classifier(out)
         return out
-
-
-def ResNet18(num_classes):
-    '''
-    ResNet18.
-
-    Parameters
-    ----------
-    num_classes: int
-        Number of classes in the output of the model.
-
-    '''
-    return ResNet(BasicBlock, [2, 2, 2, 2], num_classes)
-
-
-def ResNet34(num_classes):
-    '''
-    ResNet34.
-
-    Parameters
-    ----------
-    num_classes: int
-        Number of classes in the output of the model.
-
-    '''
-
-    return ResNet(BasicBlock, [3, 4, 6, 3], num_classes)
-
-
-def ResNet50(num_classes):
-    '''
-    ResNet50.
-
-    Parameters
-    ----------
-    num_classes: int
-        Number of classes in the output of the model.
-
-    '''
-
-    return ResNet(Bottleneck, [3, 4, 6, 3], num_classes)
-
-
-def ResNet101(num_classes):
-    '''
-    ResNet101.
-
-    Parameters
-    ----------
-    num_classes: int
-        Number of classes in the output of the model.
-
-    '''
-
-    return ResNet(Bottleneck, [3, 4, 23, 3], num_classes)
-
-
-def ResNet152(num_classes):
-    '''
-    ResNet152.
-
-    Parameters
-    ----------
-    num_classes: int
-        Number of classes in the output of the model.
-
-    '''
-
-    return ResNet(Bottleneck, [3, 8, 36, 3], num_classes)
 
 
 def test():
     '''Test the ResNet class.'''
-    net = ResNet18(num_classes=7)
-    x = torch.randn(1, 3, 32, 32)
+
+    # Define input
+    x = torch.randn(2, 3, 54, 54)
+
+    print('Test ResNet18')
+    net = ResNet('ResNet18', num_classes=7)
     y = net(x)
     print(y.size())
+
+    print('Classify is False')
+    net = ResNet('ResNet18', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+    print('Test ResNet34')
+    net = ResNet('ResNet34', num_classes=7)
+    y = net(x)
+    print(y.size())
+
+    print('Classify is False')
+    net = ResNet('ResNet34', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+    print('Test ResNet50')
+    net = ResNet('ResNet50', num_classes=7)
+    y = net(x)
+    print(y.size())
+
+    print('Classify is False')
+    net = ResNet('ResNet50', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+    print('Test ResNet101')
+    net = ResNet('ResNet101', num_classes=7)
+    y = net(x)
+    print(y.size())
+
+    print('Classify is False')
+    net = ResNet('ResNet101', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+    print('Test ResNet152')
+    net = ResNet('ResNet152', num_classes=7)
+    y = net(x)
+    print(y.size())
+
+    print('Classify is False')
+    net = ResNet('ResNet152', num_classes=7, classify=False)
+    y = net(x)
+    print(y.size())
+
+
+if __name__ == '__main__':
+    test()
