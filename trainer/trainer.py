@@ -1,4 +1,3 @@
-
 from __future__ import print_function
 import os
 
@@ -100,7 +99,7 @@ def train(cfg):
     writer = SummaryWriter(log_dir=cfg.output_dir)
 
     # Loss
-    loss_function = define_loss(multiloss=True)
+    loss_function = define_loss(multiloss=cfg.model.multiloss)
 
     # Training
     train_cfg = define_train_cfg(cfg.train, state.train)
@@ -112,13 +111,15 @@ def train(cfg):
         model.train()
         train_loss, train_accuracy = batch_loop(
             train_loader, model, optimizer,
-            loss_function, device, mode='training')
+            loss_function, device,
+            multiloss=cfg.model.multiloss, mode='training')
 
         print('Iterating over validation data...')
         model.eval()
         valid_loss, valid_accuracy = batch_loop(
             valid_loader, model, optimizer,
-            loss_function, device, mode='validation')
+            loss_function, device,
+            multiloss=cfg.model.multiloss, mode='validation')
 
         # Keep trace of train/valid loss history and valid accuracy
         train_cfg.train_loss_history.append(train_loss)

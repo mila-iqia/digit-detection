@@ -7,8 +7,7 @@ import time
 import torch
 from tqdm import tqdm
 
-from models.baselines import BaselineCNN, BaselineCNN_dropout
-from models.resnet import ResNet18, ResNet34, ResNet50, ResNet101, ResNet152
+from models.resnet import ResNet
 from models.vgg import VGG
 from models.multiloss import FC_Layer, MultiLoss
 
@@ -125,28 +124,28 @@ def define_model(model_cfg, device, model_state=None):
         The model object.
 
     '''
+    model = model_cfg.model
+    multiloss = model_cfg.multiloss
     num_classes = model_cfg.num_classes
-    if model_cfg.model == 'BaselineCNN':
-        model = BaselineCNN(num_classes)
-    elif model_cfg.model == 'BaselineCNN_dropout':
-        model = BaselineCNN_dropout()
-    elif model_cfg.model == 'ResNet18':
-        model = ResNet18(num_classes)
-    elif model_cfg.model == ' ResNet34':
-        model = ResNet34(num_classes)
-    elif model_cfg.model == ' ResNet50':
-        model = ResNet50(num_classes)
-    elif model_cfg.model == ' ResNet101':
-        model = ResNet101(num_classes)
-    elif model_cfg.model == ' ResNet152':
-        model = ResNet152(num_classes)
-    elif model_cfg.model == 'VGG':
-        model = VGG(num_classes)
-    elif model_cfg.model == 'MultiLoss':
-        base_net = VGG('VGG11', classify=False)
-        model = MultiLoss(base_net, FC_Layer)
+
+    classify = True
+    if multiloss:
+        classify = False
+
+    if model.startswith('ResNet'):
+        base_net = ResNet(model, num_classes, classify)
+    elif model.startswith('VGG'):
+        base_net = VGG(model, num_classes, classify)
     else:
         raise Exception('The model specified is not avaiable.')
+
+    if multiloss:
+        in_dim_fclayer = 512
+        if model in ['ResNet50', 'ResNet101', 'ResNet152']:
+            in_dim_fclayer = 2048
+        model = MultiLoss(base_net, FC_Layer, in_dim_fclayer)
+    else:
+        model = base_net
 
     model = model.to(device)
     if model_state:
@@ -185,6 +184,11 @@ def define_optimizer(optim_cfg, model_param, device, optim_state=None):
 def define_loss(multiloss):
     '''
     Define the loss.
+
+    Parameters
+    ----------
+    multiloss : bool
+        if True use the multiloss.
 
     Returns
     -------
