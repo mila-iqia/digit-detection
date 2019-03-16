@@ -1,5 +1,5 @@
 skopt: False
-config_name: 'TestMultiloss'
+config_name: 'Multiloss'
 dataset_name: SVHN
 seed: 1234
 
@@ -12,9 +12,9 @@ dataloader:
 
 # Hyperparameters of the model
 model:
-  model: 'MultiLoss'
+  multiloss: True
+  model: 'VGG11'
   num_classes: 7
-
 
 # Hyperparameters of the optimizer
 optimizer:
