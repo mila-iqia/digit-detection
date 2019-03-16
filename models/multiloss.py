@@ -44,7 +44,7 @@ class FC_Layer(nn.Module):
 
 class MultiLoss(nn.Module):
 
-    def __init__(self, base_net, FCLayer):
+    def __init__(self, base_net, FCLayer, in_dim_fclayer):
         '''
         Correspond to the n_digits module. This network predicts the
         number of digits in an image.
@@ -55,13 +55,15 @@ class MultiLoss(nn.Module):
             Instance network with a forward method implemented.
         FCLayer : nn.Module
             Class network for the fully connected layers.
+        in_dim_fclayer : int
+            Size of the feature map (i.e., input to feed to the FCLayer)
 
         '''
 
         super(MultiLoss, self).__init__()
         self.base_net = base_net
 
-        self.in_dim = 512
+        self.in_dim = in_dim_fclayer
 
         self.fc_layers = torch.nn.ModuleList()
 
