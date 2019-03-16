@@ -73,9 +73,11 @@ def parse_dict(d_, prefix='', lst=[]):
     d_ : dict
         Object which can be edict.
     prefix : str
-        Prefix. Default: start with ''.
+        Prefix.
+        Default: start with ''.
     lst : list
-        List of keys to be optimized. Default: start with[].
+        List of keys to be optimized.
+        Default: start with[].
 
     Returns
     -------

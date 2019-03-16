@@ -12,7 +12,8 @@ def visualize_sample(sample, outer_bbox=None):
         Output of the dataloader or any of the transforms (except ToTensor).
     outer_bbox: tuple
         Tuple of coordinates (x1, x2, y1, y2) to bounding box surrounding
-        all bboxes of digits in an image. Optional
+        all bboxes of digits in an image. Optional.
+        Default = None.
 
     '''
 

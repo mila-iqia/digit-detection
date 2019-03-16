@@ -17,9 +17,8 @@ from utils.boxes import extract_labels_boxes
 
 class SVHNDataset(data.Dataset):
 
-    def __init__(
-                self, data_dir, metadata_filename,
-                train=True, transform=None):
+    def __init__(self, data_dir, metadata_filename,
+                 train=True, transform=None):
         '''
         SVHN Dataset.
 
@@ -31,8 +30,10 @@ class SVHNDataset(data.Dataset):
             Path to the metadata_filename.
         train: bool
             If true, use the train set otherwise use the test set.
+            Default = True.
         transform : callable, optional
             Optional transform to be applied on a sample.
+            Default = None.
 
         '''
 
@@ -74,10 +75,10 @@ class SVHNDataset(data.Dataset):
             sample['metadata'] will contain the metadata associated to the
             image. It can be one of ['labels','boxes','filename']
 
-
         '''
 
-        img_name = os.path.join(self.data_dir, self.metadata[index]['split'],
+        img_name = os.path.join(self.data_dir,
+                                self.metadata[index]['split'],
                                 self.metadata[index]['filename'])
 
         # Load data and get raw metadata (labels & boxes)
@@ -97,7 +98,8 @@ class SVHNDataset(data.Dataset):
 
 class ChunkSampler(sampler.Sampler):
 
-    def __init__(self, num_samples, start=0, shuffle=False):
+    def __init__(self, num_samples,
+                 start=0, shuffle=False):
         '''
         Samples elements sequentially from some offset and eventually
         shuffle them.
@@ -107,9 +109,11 @@ class ChunkSampler(sampler.Sampler):
         num_samples: int
             # of desired datapoints
         start: int
-            Offset where we should start selecting from
+            Offset where we should start selecting from.
+            Default = 0.
         shuffle: bool.
             If True, shuffle the samples.
+            Default = False.
 
         '''
         self.num_samples = num_samples
@@ -146,9 +150,7 @@ class ChunkSampler(sampler.Sampler):
 
 
 def prepare_dataloaders(input_dir, metadata_filename, batch_size,
-                        valid_split=0.2,
-                        sample_size=-1,
-                        train=True):
+                        valid_split=0.2, sample_size=-1, train=True):
     '''
     Prepare the dataloader.
 
@@ -163,14 +165,14 @@ def prepare_dataloaders(input_dir, metadata_filename, batch_size,
     valid_split : float
         Returns a validation split of %size; valid_split*100,
         valid_split should be in range [0,1].
-        Default 0.2.
+        Default = 0.2.
     sample_size : int
         Number of elements to use as sample size,
         for debugging purposes only. If -1, use all samples.
-        Default -1.
+        Default = -1.
     train: bool
         If true, use the train set otherwise use the test set.
-        Default True.
+        Default = True.
 
     Returns
     -------

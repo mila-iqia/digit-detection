@@ -52,6 +52,7 @@ def extract_outer_box(sample, padding=0.3):
     padding : float
         Percentage of padding around the bounding boxe containg
         all digits. Should be in range [0, 1].
+        Default = 0.3.
 
     Returns
     -------
