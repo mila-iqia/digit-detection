@@ -109,8 +109,10 @@ def parse_dict(d_, prefix='', lst=[]):
             x = eval(d_)
             if isinstance(x, (Real, Integer, Categorical)):
                 lst.append((prefix, x))
-        except:
+
+        except Exception:
             pass
+
         return lst
 
 
