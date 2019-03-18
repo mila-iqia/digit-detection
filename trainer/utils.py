@@ -68,7 +68,19 @@ def save_state_dict(filename, device, model, optimizer, train_cfg):
         state.seed.torch_state_cuda = torch.cuda.get_rng_state()
     state.device = device
     state.model = model.state_dict()
-    state.optim = optimizer.state_dict()
+    # Fix a bug when saving optimizer.state_dict()
+    if optimizer.state_dict()['state'].keys():
+        dict_ = {}
+        for k, v in optimizer.state_dict().items():
+            if type(v) is dict and v.keys():
+                dict_[k] = {str(k2): v2 for k2, v2 in v.items()}
+            else:
+                dict_[k] = v
+        state.optim = dict_
+    else:
+        state.optim = optimizer.state_dict()
+    state.optim = dict_
+
     state.train = train_cfg
     torch.save(state, filename)
 
@@ -153,7 +165,7 @@ def define_model(model_cfg, device, model_state=None):
     return model
 
 
-def define_optimizer(optim_cfg, model_param, device, optim_state=None):
+def define_optimizer(optim_cfg, model_param, optim_state=None):
     '''
     Define the optimizer to be used.
 
@@ -175,8 +187,17 @@ def define_optimizer(optim_cfg, model_param, device, optim_state=None):
 
     '''
     optimizer = torch.optim.SGD(
-        model_param, lr=optim_cfg.lr)  # , momentum=optim_cfg.momentum)
+        model_param, lr=optim_cfg.lr, momentum=optim_cfg.momentum)
     if optim_state:
+        # Fix a bug when loading optimizer.state_dict()
+        if optim_state['state'].keys():
+            dict_ = {}
+            for k, v in optim_state.items():
+                if type(v) is EasyDict and v.keys():
+                    dict_[k] = {int(k2): v2 for k2, v2 in v.items()}
+                else:
+                    dict_[k] = v
+            optim_state = dict_
         optimizer.load_state_dict(optim_state)
     return optimizer
 
@@ -224,7 +245,6 @@ def define_train_cfg(train_cfg, train_state=None):
     if not train_state:
         train_cfg.starting_epoch = 0
         train_cfg.patience = 0
-        train_cfg.max_patience = 8
         train_cfg.train_loss_history = []
         train_cfg.train_accuracy_history = []
         train_cfg.valid_loss_history = []
@@ -233,6 +253,7 @@ def define_train_cfg(train_cfg, train_state=None):
         train_cfg.since = time.time()
     else:
         train_cfg = train_state
+        train_cfg.starting_epoch = train_cfg.epoch_state
     return train_cfg
 
 
@@ -394,12 +415,19 @@ def batch_loop(loader, model, optimizer, loss_function, device,
 
     if multiloss:
         per_branch_accuracy = per_branch_correct / n_samples
-        print("Accuracy per branch", per_branch_accuracy)
 
     if mode in ['training', 'validation']:
-
-        return epoch_loss, accuracy
+        scores = {}
+        scores['epoch_loss'] = epoch_loss
+        scores['accuracy'] = accuracy
+        if multiloss:
+            scores['per_branch_accuracy'] = per_branch_accuracy
+        return scores
 
     elif mode == 'testing':
-
-        return accuracy, total_predicted_house_numbers
+        scores = {}
+        scores['accuracy'] = accuracy
+        scores['total_predicted_house_numbers'] = total_predicted_house_numbers
+        if multiloss:
+            scores['per_branch_accuracy'] = per_branch_accuracy
+        return scores
