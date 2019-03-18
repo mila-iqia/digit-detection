@@ -5,7 +5,7 @@ seed: 1234
 dataloader:
   train: true
   valid_split: 0.2
-  sample_size: 100
+  sample_size: 1000
   batch_size: 32
 model:
   multiloss: true
@@ -15,7 +15,7 @@ optimizer:
   lr: Real(10**-4, 10**-2, 'log-uniform')
   momentum: 0.9
 train:
-  num_epochs: 10
+  num_epochs: 25
   max_patience: 8
 skopt_cfg:
   n_iter: 3
