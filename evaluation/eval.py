@@ -5,11 +5,11 @@ import time
 import numpy as np
 import torch
 
-from utils.dataloader import prepare_dataloaders
-from trainer.trainer import batch_loop
-
 import sys
 sys.path.append('..')
+
+from utils.dataloader import prepare_dataloaders
+from trainer.trainer import batch_loop
 
 def eval_model(dataset_dir, metadata_filename, model_filename,
                batch_size, sample_size):
@@ -68,12 +68,8 @@ if __name__ == "__main__":
     results_dir = args.results_dir
     #########################################
 
-    parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--sample_size", type=int, default=None)
-
-    batch_size = args.batch_size
-    sample_size = args.sample_size
-    #  model_filename = args.model_filename
+    batch_size = 32
+    sample_size = -1
 
     # Put your group name here
     group_name = "b2phutN_multiloss_preds"
