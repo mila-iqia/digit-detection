@@ -7,10 +7,10 @@ from easydict import EasyDict
 import operator
 from pathlib import Path
 import pprint
+import ruamel.yaml as yaml
 import skopt
 import shutil
 import time
-import yaml
 from tensorboardX import SummaryWriter
 
 import torch
@@ -49,77 +49,106 @@ def train(cfg):
     print('Device: ', device)
 
     # Checkpointing
-    cfg_filename = os.path.join(cfg.output_dir, 'cfg.yml')
-    state_filename = os.path.join(cfg.output_dir, 'checkpoint_state.pth.tar')
+    cfg_filename = os.path.join(cfg['output_dir'], 'cfg.yml')
+    state_filename = os.path.join(cfg['output_dir'],
+                                  'checkpoint_state.pth.tar')
     state = EasyDict({'model': None,
                       'optim': None,
                       'train': None})
+
     if Path(state_filename).exists():
         with open(cfg_filename, 'r') as f:
-            save_cfg = EasyDict(yaml.load(f))
+            save_cfg = yaml.load(f)
 
-        if not operator.eq(cfg, save_cfg):
+        if not operator.eq(cfg, save_cfg) and not cfg['skopt']:
             raise AssertionError(
                 'The config is not the same as the checkpointing one')
 
+        elif not operator.eq(cfg, save_cfg) and cfg['skopt']:
+            save_cfg_iteration = save_cfg['skopt_cfg']['iteration']
+            cfg_iteration = cfg['skopt_cfg']['iteration']
+            if save_cfg_iteration + 1 == cfg_iteration:
+                # Save config
+                with open(cfg_filename, 'w') as f:
+                    yaml.dump(cfg, f, Dumper=yaml.RoundTripDumper)
+                print('No checkpoint available...')
+            else:
+                raise AssertionError(
+                    'The config is not the same as the checkpointing one')
+
         print('Load checkpoint...')
         state = load_state_dict(state_filename, device)
-        cfg.seed = state.seed
+        cfg['seed'] = state.seed
 
     else:
         # Save config
         with open(cfg_filename, 'w') as f:
-            yaml.dump(cfg, f, default_flow_style=False)
+            yaml.dump(cfg, f, Dumper=yaml.RoundTripDumper)
         print('No checkpoint available...')
 
     # Seed
-    set_seed(cfg.seed)
+    set_seed(cfg['seed'])
 
     # Data
     train_loader, valid_loader = prepare_dataloaders(
-        cfg.input_dir,
-        cfg.metadata_filename,
-        cfg.dataloader.batch_size,
-        cfg.dataloader.valid_split,
-        cfg.dataloader.sample_size)
+        cfg['input_dir'],
+        cfg['metadata_filename'],
+        cfg['dataloader']['batch_size'],
+        cfg['dataloader']['valid_split'],
+        cfg['dataloader']['sample_size'])
 
     # Model
-    model = define_model(cfg.model, device, state.model)
+    model = define_model(EasyDict(cfg['model']), device, state.model)
     best_model = copy.deepcopy(model)
     print('Using model:')
     print(model)
 
     # Optimizer
-    optimizer = define_optimizer(cfg.optimizer, model.parameters(),
+    optimizer = define_optimizer(EasyDict(cfg['optimizer']),
+                                 model.parameters(),
                                  state.optim)
     print('Using optimizer:')
     print(optimizer)
 
     # TensorboardX
-    writer = SummaryWriter(log_dir=cfg.output_dir)
+    writer = SummaryWriter(log_dir=cfg['output_dir'])
 
     # Loss
-    loss_function = define_loss(multiloss=cfg.model.multiloss)
+    multiloss = cfg['model']['multiloss']
+    loss_function = define_loss(multiloss=multiloss)
 
     # Training
-    train_cfg = define_train_cfg(cfg.train, state.train)
+    train_cfg = define_train_cfg(EasyDict(cfg['train']), state.train)
     print('Start training...')
     # Iterate over epochs
     for epoch in range(train_cfg.starting_epoch, train_cfg.num_epochs):
 
         print('\n\n\nIterating over training data...')
         model.train()
-        train_loss, train_accuracy = batch_loop(
+
+        train_scores = batch_loop(
             train_loader, model, optimizer,
             loss_function, device,
-            multiloss=cfg.model.multiloss, mode='training')
+            multiloss=multiloss, mode='training')
+
+        # Train statistics
+        train_loss = train_scores['epoch_loss']
+        train_accuracy = train_scores['accuracy']
+        if multiloss:
+            train_per_branch_accuracy = train_scores['per_branch_accuracy']
 
         print('Iterating over validation data...')
         model.eval()
-        valid_loss, valid_accuracy = batch_loop(
+        valid_scores = batch_loop(
             valid_loader, model, optimizer,
             loss_function, device,
-            multiloss=cfg.model.multiloss, mode='validation')
+            multiloss=multiloss, mode='validation')
+
+        # Valid statistics
+        valid_loss = valid_scores['epoch_loss']
+        valid_accuracy = valid_scores['accuracy']
+        if multiloss:
+            valid_per_branch_accuracy = valid_scores['per_branch_accuracy']
 
         # Keep trace of train/valid loss history and valid accuracy
         train_cfg.train_loss_history.append(train_loss)
@@ -128,10 +157,20 @@ def train(cfg):
         train_cfg.valid_accuracy_history.append(valid_accuracy)
 
         print('\nEpoch: {}/{}'.format(epoch + 1, train_cfg.num_epochs))
+
+        # Print train statistics
         print('\tTrain Loss: {:.4f}'.format(train_loss))
         print('\tTrain Accuracy: {:.4f}'.format(train_accuracy))
+        if multiloss:
+            print('\tTrain Accuracy per branch: {}'.format(
+                train_per_branch_accuracy))
+
+        # Print valid statistics
         print('\tValid Loss: {:.4f}'.format(valid_loss))
         print('\tValid Accuracy: {:.4f}'.format(valid_accuracy))
+        if multiloss:
+            print('\tValid Accuracy per branch: {}'.format(
+                valid_per_branch_accuracy))
 
         writer.add_scalar('data/train_loss', train_loss, epoch)
         writer.add_scalar('data/train_accuracy', train_accuracy, epoch)
@@ -139,13 +178,13 @@ def train(cfg):
         writer.add_scalar('data/valid_accuracy', valid_loss, epoch)
 
         # Early stopping and checkpointing best model
-        if valid_accuracy > train_cfg.valid_best_accuracy:
+        if valid_accuracy > train_cfg.valid_best_accuracy or epoch == 0:
             train_cfg.patience = 0
             train_cfg.valid_best_accuracy = valid_accuracy
             best_model = copy.deepcopy(model)
 
             print('New best model: checkpointing current state...')
-            train_cfg.epoch = epoch + 1
+            train_cfg.epoch_state = epoch + 1
             save_state_dict(state_filename, device,
                             model, optimizer, train_cfg)
 
@@ -166,7 +205,7 @@ def train(cfg):
     print('Best valid accuracy: ', train_cfg.valid_best_accuracy)
 
     print('Saving best model ...')
-    model_filename = cfg.output_dir + '/best_model.pth'
+    model_filename = os.path.join(cfg['output_dir'], 'best_model.pth')
     torch.save(best_model, model_filename)
     print('Best model saved to :', model_filename)
 
@@ -175,7 +214,7 @@ def train(cfg):
     return valid_best_accuracy
 
 
-def train_skopt(cfg, n_iter=10, base_estimator='GP',
+def train_skopt(cfg, base_estimator='GP',
                 n_initial_points=10, random_state=0,
                 train_function=train):
 
@@ -187,8 +226,6 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
     ----------
     cfg : dict
         Configuration dict to use.
-    n_iter : int
-        Number of Bayesien optimization steps.
     base_estimator : str
         skopt Optimization procedure. In ['GP', 'RF', 'ET', 'GBRT']
         Default 'GP'.
@@ -204,8 +241,25 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
 
     '''
 
+    # Checkpointing
+    cfg_filename = os.path.join(cfg['output_dir'], 'cfg_ori.yml')
+
+    if Path(cfg_filename).exists():
+        with open(cfg_filename, 'r') as f:
+            save_cfg = EasyDict(yaml.load(f))
+
+        if not operator.eq(cfg, save_cfg):
+            raise AssertionError(
+                'The config is not the same as the checkpointing one')
+
+    else:
+        # Save config
+        with open(cfg_filename, 'w') as f:
+            yaml.dump(cfg, f, Dumper=yaml.RoundTripDumper)
+
     # Sparse the parameters that we want to optimize
     skopt_args = OrderedDict(parse_dict(cfg))
+    n_iter = cfg['skopt_cfg']['n_iter']
 
     # Create the optimizer
     starting_iter = 0
@@ -216,9 +270,10 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
 
     valid_best_accuracy = 0
     skopt_accuracy_history = []
+    skopt_suggestion_history = []
 
     # Checkpointing
-    state_skopt_filename = os.path.join(cfg.output_dir,
+    state_skopt_filename = os.path.join(cfg['output_dir'],
                                         'checkpoint_skopt_state.pkl')
 
     # Check if checkpointing exist
@@ -231,15 +286,20 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
         optimizer.rng = state_skopt.optim_state
         valid_best_accuracy = state_skopt.valid_best_accuracy
         skopt_accuracy_history = state_skopt.skopt_accuracy_history
+        skopt_suggestion_history = state_skopt.skopt_suggestion_history
     else:
         print('No skopt checkpoint...')
 
-    for i in range(starting_iter, n_iter):
+    for iteration in range(starting_iter, n_iter):
+        print('\n\n\nStart skopt iteration # {}'.format(iteration))
         suggestion = optimizer.ask()
+        skopt_suggestion_history.append(suggestion)
         this_cfg = generate_config(cfg, skopt_args, suggestion)
-        this_cfg.output_dir = os.path.join(
-            this_cfg.output_dir, 'iter_' + str(i))
-        mkdir_p(this_cfg.output_dir)
+        this_cfg['skopt_cfg']['iteration'] = iteration
+        this_cfg['output_dir'] = os.path.join(
+           cfg['output_dir'], 'currrent_iter')
+        mkdir_p(this_cfg['output_dir'])
+
         try:
             # We minimize the negative accuracy/AUC
             valid_accuracy = train_function(this_cfg)
@@ -254,22 +314,39 @@ def train_skopt(cfg, n_iter=10, base_estimator='GP',
             skopt_accuracy_history.append(valid_accuracy)
 
         state_skopt = {'optim_state': optimizer.rng,
-                       'iteration': i + 1,
+                       'iteration': iteration + 1,
                        'valid_best_accuracy': valid_best_accuracy,
-                       'skopt_accuracy_history': skopt_accuracy_history}
+                       'skopt_accuracy_history': skopt_accuracy_history,
+                       'skopt_suggestion_history': skopt_suggestion_history,
+                       'skopt_args': skopt_args}
         save_obj(state_skopt, state_skopt_filename)
 
-        if valid_accuracy > valid_best_accuracy:
+        if valid_accuracy > valid_best_accuracy or iteration == 0:
             valid_best_accuracy = valid_accuracy
 
             print('Checkpointing new best model...')
+            path_best_cfg = os.path.join(
+                this_cfg['output_dir'], 'cfg.yml')
             path_best_model = os.path.join(
-                this_cfg.output_dir, 'best_model.pth')
+                this_cfg['output_dir'], 'best_model.pth')
             path_checkpoint_state = os.path.join(
-                this_cfg.output_dir, 'checkpoint_state.pth.tar')
-            shutil.copy(path_best_model, cfg.output_dir)
-            shutil.copy(path_checkpoint_state, cfg.output_dir)
+                this_cfg['output_dir'], 'checkpoint_state.pth.tar')
+            shutil.copy(path_best_cfg, cfg['output_dir'])
+            shutil.copy(path_best_model, cfg['output_dir'])
+            shutil.copy(path_checkpoint_state, cfg['output_dir'])
 
+    print('\n\n\n### FIND BEST CONFIG/MODEL ###')
+
+    # Find best config/model index
     maxpos = skopt_accuracy_history.index(max(skopt_accuracy_history))
-    print(os.path.join(cfg.output_dir, 'iter_' + str(maxpos)))
-    print(skopt_accuracy_history)
+
+    print('Best skopt config')
+    best_cfg_filename = os.path.join(cfg['output_dir'], 'cfg.yml')
+    with open(best_cfg_filename, 'r') as f:
+        best_cfg = yaml.load(f)
+    pprint.pprint(best_cfg)
+
+    print('Best config/model index: {}'.format(maxpos))
+    print('Skopt args: {}'.format(list(skopt_args.keys())))
+    print('Best skopt suggestion: {}'.format(skopt_suggestion_history[maxpos]))
+    print('Best skopt accuracy: {}'.format(skopt_accuracy_history[maxpos]))
