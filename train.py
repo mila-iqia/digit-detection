@@ -54,7 +54,7 @@ if __name__ == '__main__':
     cfg = load_config(args)
 
     # Train de model
-    if cfg.skopt:
+    if cfg['skopt']:
         # Train using hyperparameters tuning with skopt
         train_skopt(cfg)
     else:
