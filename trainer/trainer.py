@@ -75,10 +75,10 @@ def train(cfg):
             else:
                 raise AssertionError(
                     'The config is not the same as the checkpointing one')
-
-        print('Load checkpoint...')
-        state = load_state_dict(state_filename, device)
-        cfg['seed'] = state.seed
+        else:
+            print('Load checkpoint...')
+            state = load_state_dict(state_filename, device)
+            cfg['seed'] = state.seed
 
     else:
         # Save config
