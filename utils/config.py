@@ -1,9 +1,10 @@
 import os
 
 import copy
-from easydict import EasyDict
+import datetime
+import dateutil.tz
+import ruamel.yaml as yaml
 from skopt.space import Real, Integer, Categorical
-import yaml
 
 from utils.misc import mkdir_p
 
@@ -24,7 +25,7 @@ def cfg_from_file(filename):
 
     '''
     with open(filename, 'r') as f:
-        cfg = EasyDict(yaml.load(f))
+        cfg = yaml.load(f)
     return cfg
 
 
@@ -36,8 +37,9 @@ def load_config(args):
     ----------
     args : dict
         {'cfg': 'file.yml',
-         'dataset_dir': 'path_to_data',
-         'results_dir': path to results}
+         'dataset_dir': str, path to data,
+         'metadata_filename': str, path to meta data,
+         'results_dir': str, path to results}
 
     Returns
     -------
@@ -51,14 +53,25 @@ def load_config(args):
 
     cfg = cfg_from_file(args.cfg)
 
-    cfg.metadata_filename = args.metadata_filename
+    # Checkpointing
+    if 'output_dir' not in cfg:
+        # Add metadata_filename to cfg
+        cfg['metadata_filename'] = args.metadata_filename
 
-    cfg.input_dir = args.dataset_dir
-    cfg.output_dir = os.path.join(
-        args.results_dir,
-        '%s_%s' % (cfg.dataset_name, cfg.config_name))
+        # Add input_dir to cfg
+        cfg['input_dir'] = args.dataset_dir
 
-    mkdir_p(cfg.output_dir)
+        # Add output_dir to cfg
+        now = datetime.datetime.now(dateutil.tz.tzlocal())
+        timestamp = now.strftime('%Y_%m_%d_%H_%M_%S')
+        cfg['output_dir'] = os.path.join(
+            args.results_dir,
+            '%s_%s_%s' % (cfg['dataset_name'], cfg['config_name'], timestamp))
+        mkdir_p(cfg['output_dir'])
+
+        # Overwrite args.cfg file for checkpointing purpose
+        with open(args.cfg, 'w') as f:
+            yaml.dump(cfg, f, Dumper=yaml.RoundTripDumper)
 
     return cfg
 
@@ -118,7 +131,7 @@ def set_key(dic, key, value):
     k1 = key.split(".")
     k1 = list(filter(lambda l: len(l) > 0, k1))
     if len(k1) == 1:
-        dic[k1[0]] = value
+        dic[k1[0]] = value.item()
     else:
         set_key(dic[k1[0]], ".".join(k1[1:]), value)
 
