@@ -14,8 +14,7 @@ case of a mobile application), etc.
 
 ## Quick usage on Helios
 
-To run the code on Helios, you can use the scripts in
-`scrips/helios/train_on_helios.sh`.
+To run the code on Helios, you can use the scripts `train_on_helios.sh`.
 
 You can run this directly from the login node using msub:
 
@@ -24,18 +23,25 @@ You can run this directly from the login node using msub:
 You can easily add this script to a `.pbs` file with your specific settings.
 
 To change the data directories, you can modify the`train_on_helios.sh` script.
-To change configurations during training, use the `config/base_config.yml` file.
-This contains tuneable options that can be useful. To use skopt bayesian
-hyperparameter optimisation use the `config/skopt_base_config.yml` file.
 
-To modify the models used, modify the appropriate model declaration in
-`trainer/trainer.py`. Currently, VGG and Resnet as well as simple
-baselines are implemented.
+To change configurations during training, use the `config/base_config.yml` file.
+This contains tuneable options that can be useful.
+
+To use skopt bayesian hyperparameter optimisation use the
+`config/skopt_base_config.yml` file.
+
+To add new models, create a new model file in `models/` folder  and modify
+the appropriate model declaration in `trainer/trainer.py`. Currently,
+VGG and Resnet are implemented.
 
 ## Best Model
 
+### Bloc 1
 The best performing model found for the first part of the project was a VGG19
 with learning rate 1e-3, momentum 0.9, SGD optimizer and batch size of 32.
+
+### Bloc 2
+???
 
 ## Run the code interactively
 For debugging purpose you might want to run your code interactively.
