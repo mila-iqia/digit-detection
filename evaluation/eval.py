@@ -11,6 +11,7 @@ sys.path.append('..')
 from utils.dataloader import prepare_dataloaders
 from trainer.trainer import batch_loop
 
+
 def eval_model(dataset_dir, metadata_filename, model_filename,
                batch_size, sample_size):
 
@@ -33,7 +34,7 @@ def eval_model(dataset_dir, metadata_filename, model_filename,
 
     scores = batch_loop(test_loader, model, optimizer, loss_function, device, multiloss=True, mode='testing')
     accuracy = scores['accuracy']
-    total_predictions = scores['total_predictions']
+    total_predictions = scores['total_predicted_house_numbers']
 
     print('\tTest Accuracy: {:.4f}'.format(accuracy))
 
