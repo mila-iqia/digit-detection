@@ -28,20 +28,24 @@ To change configurations during training, use the `config/base_config.yml` file.
 This contains tuneable options that can be useful.
 
 To use skopt bayesian hyperparameter optimisation use the
-`config/skopt_base_config.yml` file.
+`config/skopt_base_config.yml` file by changing the `--cfg` flag in `train_on_helios.sh`
 
 To add new models, create a new model file in `models/` folder  and modify
 the appropriate model declaration in `trainer/trainer.py`. Currently,
 VGG and Resnet are implemented.
 
-## Best Model
+After every run, to be able to resume an already running experience, additional information such as the output 
+directory of the current experiment will be appended to the config file. These should be manually removed before new experiments.
+
+## Basline Model
 
 ### Bloc 1
-The best performing model found for the first part of the project was a VGG19
+The baseline model used for the first part of the project was a VGG19
 with learning rate 1e-3, momentum 0.9, SGD optimizer and batch size of 32.
 
 ### Bloc 2
-???
+The baseline model used for the second part of the project was a VGG19
+with learning rate 1e-3, momentum 0.9, SGD optimizer and batch size of 32.
 
 ## Run the code interactively
 For debugging purpose you might want to run your code interactively.
