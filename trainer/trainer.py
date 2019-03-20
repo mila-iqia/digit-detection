@@ -175,7 +175,7 @@ def train(cfg):
         writer.add_scalar('data/train_loss', train_loss, epoch)
         writer.add_scalar('data/train_accuracy', train_accuracy, epoch)
         writer.add_scalar('data/valid_loss', valid_loss, epoch)
-        writer.add_scalar('data/valid_accuracy', valid_loss, epoch)
+        writer.add_scalar('data/valid_accuracy', valid_accuracy, epoch)
 
         # Early stopping and checkpointing best model
         if valid_accuracy > train_cfg.valid_best_accuracy or epoch == 0:
