@@ -31,7 +31,9 @@ def eval_model(dataset_dir, metadata_filename, model_filename,
     optimizer = None
     loss_function = None
 
-    accuracy, total_predictions = batch_loop(test_loader, model, optimizer, loss_function, device, multiloss=True, mode='testing')
+    scores = batch_loop(test_loader, model, optimizer, loss_function, device, multiloss=True, mode='testing')
+    accuracy = scores['accuracy']
+    total_predictions = scores['total_predictions']
 
     print('\tTest Accuracy: {:.4f}'.format(accuracy))
 
