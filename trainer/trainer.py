@@ -184,7 +184,13 @@ def train(cfg):
             best_model = copy.deepcopy(model)
 
             print('New best model: checkpointing current state...')
+            # This will be redundant in memory with save_state_dict, but useful
+            # for loading a model standalone
+            torch.save(best_model, cfg['output_dir'] + '/checkpoint.pth')
+
             train_cfg.epoch_state = epoch + 1
+
+            # save entire state dict, including model, optimizer and config
             save_state_dict(state_filename, device,
                             model, optimizer, train_cfg)
 
