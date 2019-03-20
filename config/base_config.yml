@@ -5,11 +5,11 @@ seed: 1234
 dataloader:
   train: true
   valid_split: 0.2
-  sample_size: 1000
+  sample_size: -1 # Set to ~1000 if debugging, -1 uses all the data 
   batch_size: 32
 model:
   multiloss: true
-  model: VGG11
+  model: VGG19
   num_classes: 7
 optimizer:
   lr: 0.001
