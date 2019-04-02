@@ -138,18 +138,28 @@ def define_model(model_cfg, device, model_state=None):
     '''
     model = model_cfg.model
     multiloss = model_cfg.multiloss
+    pretrained = model_cfg.pretrained
+    pretrained_path = model_cfg.pretrained_path
     num_classes = model_cfg.num_classes
 
     classify = True
     if multiloss:
         classify = False
 
-    if model.startswith('ResNet'):
-        base_net = ResNet(model, num_classes, classify)
-    elif model.startswith('VGG'):
-        base_net = VGG(model, num_classes, classify)
+    if pretrained:
+        print('Using pre-trained model for base network')
+        print('loading model from : ', pretrained_path)
+        pretrained_model = torch.load(pretrained_path, map_location=device)
+        base_net = pretrained_model.base_net
+
     else:
-        raise Exception('The model specified is not avaiable.')
+        print('Initializing new model ...')
+        if model.startswith('ResNet'):
+            base_net = ResNet(model, num_classes, classify)
+        elif model.startswith('VGG'):
+            base_net = VGG(model, num_classes, classify)
+        else:
+            raise Exception('The model specified is not avaiable.')
 
     if multiloss:
         in_dim_fclayer = 512
