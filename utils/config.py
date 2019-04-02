@@ -70,7 +70,7 @@ def load_config(args):
         mkdir_p(cfg['output_dir'])
 
         # Overwrite args.cfg file for checkpointing purpose
-        with open(args.cfg, 'w') as f:
+        with open(cfg['output_dir']+'/cfg.yml', 'w') as f:
             yaml.dump(cfg, f, Dumper=yaml.RoundTripDumper)
 
     return cfg
