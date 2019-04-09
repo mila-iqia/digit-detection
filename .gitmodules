@@ -1,0 +1,3 @@
+[submodule "maskrcnn-mila"]
+	path = maskrcnn-mila
+	url = git@github.com:jerpint/maskrcnn-mila.git
