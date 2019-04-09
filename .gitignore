@@ -14,7 +14,7 @@
 # Ignore pipfiles
 Pip*
 
-results/*
-data/*
+digit_detector/results/*
+digit_detector/data/*
 
 */__pycache__/*

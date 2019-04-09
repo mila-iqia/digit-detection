@@ -1,0 +1,31 @@
+skopt: True
+config_name: 'Multiloss_skopt'
+dataset_name: SVHN
+seed: 1234
+
+# Hyperparameters related to dataloader
+dataloader:
+  train: True
+  valid_split: 0.2
+  sample_size: -1 # Number of samples to use (for debugging purposes), set to -1 to use the entire dataset
+  batch_size: 32
+
+# Hyperparameters of the model
+model:
+  multiloss: True
+  model: 'VGG11'
+  num_classes: 7
+
+# Hyperparameters of the optimizer
+optimizer:
+  lr: Real(10**-4, 10**-2, 'log-uniform')
+  momentum: 0.9
+
+# Hyperparameters related to model training
+train:
+  num_epochs: 25
+  max_patience: 8
+
+# Hyperparameters related to skopt
+skopt_cfg:
+  n_iter: 3
