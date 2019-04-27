@@ -14,7 +14,7 @@
 
 [100 Numpy exercises](https://github.com/rougier/numpy-100)
 
-[Numpy tutorial](http://www.labri.fr/perso/nrougier/teaching/numpy/numpy.html)
+[Numpy tutorial](https://github.com/rougier/numpy-tutorial)
 
 ### Pytorch
 [Pytorch tutorials](https://pytorch.org/tutorials/)
