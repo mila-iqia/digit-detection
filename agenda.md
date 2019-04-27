@@ -167,7 +167,7 @@ We recommend you to submit at least a preliminary version of the deliverable dur
 ### Week 4 [Jan. 28 - Feb. 1]: Block 1 Third week
 #### Wednesday, January 28th
 
-- The deadline for the first deliverable is __Friday, February 8th at 11:59pm__. See the [evaluation grid](https://github.com/mila-iqia/digit-detection/blob/master/project/guidelines/evaluation-grid.pdf) for further information.
+- The deadline for the first deliverable is __Friday, February 8th at 11:59pm__. See the [evaluation grid](https://github.com/mila-iqia/digit-detection/blob/master/project/evaluation/guidelines/evaluation-grid.pdf) for further information.
 
 - The evaluation scripts are located in __ift6759/projects/<project_name>/evaluation/__. See [Block 1 Common Presentations](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/common-week3.pdf) for further information.
 
