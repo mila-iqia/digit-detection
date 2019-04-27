@@ -34,9 +34,9 @@
 
 - Announcements
 
-- [Block report guidelines](https://github.com/mila-iqia/digit-detection/tree/master/project/evaluation/guidelines/guidelines-block-report.pdf)
+- [Block report guidelines](https://github.com/mila-iqia/digit-detection/blob/master/project/evaluation/guidelines/guidelines-block-report.pdf)
 
-- [Final presentation guidelines](https://github.com/mila-iqia/digit-detection/tree/master/project/evaluation/guidelines/guidelines-final-presentation.pdf)
+- [Final presentation guidelines](https://github.com/mila-iqia/digit-detection/blob/master/project/evaluation/guidelines/guidelines-final-presentation.pdf)
 
 - Working Session
 
