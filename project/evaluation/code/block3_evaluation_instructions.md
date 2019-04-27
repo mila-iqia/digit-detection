@@ -4,7 +4,7 @@ Due to the pipeline structure of block 3 and its dependencies, please follow thi
 
 ## Submissions
 
-Your code will be executed using the script `run_evaluation.sh`. You can find it on the course's [github](https://github.com/mila-iqia/digit-detection/tree/master/projects/evaluation/run_evaluation.sh). You are responsible to ensure that once the script is executed, the proper output is saved to the proper paths, which are specified in `run_evaluation.sh`. Take a close look at `run_evaluation.sh`. It will call `s_exec` on `block3_evaluation.sh`. This means that all subsequent code will be running from inside the singularity containers.
+Your code will be executed using the script `run_evaluation.sh`. You can find it on the course's [github](https://github.com/mila-iqia/digit-detection/blob/master/project/evaluation/run_evaluation.sh). You are responsible to ensure that once the script is executed, the proper output is saved to the proper paths, which are specified in `run_evaluation.sh`. Take a close look at `run_evaluation.sh`. It will call `s_exec` on `block3_evaluation.sh`. This means that all subsequent code will be running from inside the singularity containers.
 
 It is your responsibility to fill out `block3_evaluation.sh`. You can use the `eval.py` file for inspiration that was used for blocs 1 and 2.
 
