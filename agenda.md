@@ -169,7 +169,7 @@ We recommend you to submit at least a preliminary version of the deliverable dur
 
 - The deadline for the first deliverable is __Friday, February 8th at 11:59pm__. See the [evaluation grid](https://github.com/mila-iqia/digit-detection/blob/master/project/evaluation/guidelines/evaluation-grid.pdf) for further information.
 
-- The evaluation scripts are located in __ift6759/projects/<project_name>/evaluation/__. See [Block 1 Common Presentations](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/common-week3.pdf) for further information.
+- The evaluation scripts are located in __ift6759/projects/<project_name>/evaluation/__. See [Week 3 Common Presentation](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/common-week3.pdf) for further information.
 
 ### Week 3 [Jan. 21 - 25]: Block 1 Second week
 #### Friday, January 25th
@@ -178,7 +178,7 @@ We recommend you to submit at least a preliminary version of the deliverable dur
 
 #### Wednesday, January 23th
 
-- [Week 3 Common Presentations](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/common-week3.pdf) will be presented in the __Mila auditorium at 15h30__.
+- [Week 3 Common Presentation](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/common-week3.pdf) will be presented in the __Mila auditorium at 15h30__.
 
 ### Week 2 [Jan. 14 - 18]: Block 1 First week
 #### Friday, January 18th
@@ -187,9 +187,9 @@ We recommend you to submit at least a preliminary version of the deliverable dur
 
 #### Wednesday, January 16th
 
-- [Block 1 Common Presentations](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/common-week2.pdf) will be presented in the __Mila auditorium at 15h30__.
+- [Block 1 Common Presentation](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/common-week2.pdf) will be presented in the __Mila auditorium at 15h30__.
 
-- [Door number detection project block 1 description](https://github.com/mila-iqia/digit-detection/blob/master/project/slides/block1.pdf) will be presented in the __Mila auditorium__ after the common presentations.
+- [Door number detection project block 1 description](https://github.com/mila-iqia/digit-detection/blob/master/project/slides/block1.pdf) will be presented in the __Mila auditorium__ after the common presentation.
 
 ### Week 1 [Jan. 7 - 11]: Introduction to the class <a name="first_week"></a>
 #### Friday, January 11th
