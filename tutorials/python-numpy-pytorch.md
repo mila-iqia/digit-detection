@@ -1,14 +1,14 @@
 ## Getting started with Python, NumPy and PyTorch
 
 ### Python
-[Mila primer](https://github.com/mila-iqia/ift6759/blob/master/tutorials/python-mila-primer.pdf)
+[Mila primer](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/python-mila-primer.pdf)
 
 [Google's Python Class](https://developers.google.com/edu/python/)
 
 [A Byte of Python](https://python.swaroopch.com/)
 
 ### Numpy
-[Mila primer](https://github.com/mila-iqia/ift6759/blob/master/tutorials/numpy-mila-primer.pdf)
+[Mila primer](https://github.com/mila-iqia/digit-detection/blob/master/tutorials/numpy-mila-primer.pdf)
 
 [Numpy User Guide](https://docs.scipy.org/doc/numpy/user/index.html)
 
