@@ -9,16 +9,16 @@ The course will cover 3 different projects in parallel, each with their unique c
 
 Machine learning solutions of increasing complexity will be developed as we move from block to block.
 
-Students will work on all 3 projects on a rotation basis: at the beginning of each block, new teams of 4 students each will be created. One third of the teams will work on each project. Those teams will work independently of each other and will each strive to obtain the best possible performance for the tasks defined for the project for the block. At the end of the block, each team will provide a deliverable (code + best model + report). Those deliverables, along with a baseline built by the TAs for the block, will be made available for the teams who will be assigned to the next block of the same project. Those teams will each need to select one of the deliverables or the TA baseline as a starting point for the work they will do in the next block. This process will continue up to the end of block 3. Each team assigned to a particular project in block 3 will also be responsible for preparing a final presentation for the entire project. The presentations will be delivered in front of the students as well as representatives from the companies.
+Students will work on all 3 projects on a rotation basis: at the beginning of each block, new teams of 4 students each will be created. One third of the teams will work on each project. Those teams will work independently of each other and will each strive to obtain the best possible performance for the tasks defined for the project for the block. At the end of the block, each team will provide a deliverable (code + best model + report). Those deliverables, along with a baseline built by the assistants for the block, will be made available for the teams who will be assigned to the next block of the same project. Those teams will each need to select one of the deliverables or the assistants baseline as a starting point for the work they will do in the next block. This process will continue up to the end of block 3. Each team assigned to a particular project in block 3 will also be responsible for preparing a final presentation for the entire project. The presentations will be delivered in front of the students as well as representatives from the companies.
 
 ### Instruction Style
-Tutorials will be presented during the first week of the course, as well as the first week of each block. The remaining class time will be used by students to work on the projects. Every week, the teams of students will have an appointment with the TAs to discuss their avancement and what they plan to do for the following week. In addition to that, TAs will be available during classes to support students. (It is expected that students will continue to work on the projects outside class hours.)
+Tutorials will be presented during the first week of the course, as well as the first week of each block. The remaining class time will be used by students to work on the projects. Every week, the teams of students will have an appointment with the assistants to discuss their avancement and what they plan to do for the following week. In addition to that, assistants will be available during classes to support students. (It is expected that students will continue to work on the projects outside class hours.)
 
 ### Evaluation
 Each student will be involved in 4 main deliverables: one deliverable (code + best model + report) at the end of each block and one final presentation at the end of the semester. A deliverable is done by a team of 4 students.
 
-Code provided by a team at the end of a block will be peer-reviewed by 2 other teams working on the same project in that block. The code will also be reviewed by the TAs.
-The reports, best models, and final presentations will all only be reviewed by the TAs.
+Code provided by a team at the end of a block will be peer-reviewed by 2 other teams working on the same project in that block. The code will also be reviewed by the assistants.
+The reports, best models, and final presentations will all only be reviewed by the assistants.
 
 The [full evaluation grid is available here.](https://github.com/mila-iqia/digit-detection/blob/master/project/evaluation/guidelines/evaluation-grid.pdf)
 
@@ -27,7 +27,8 @@ All questions can be sent to the following email address: <ift6759@mila.quebec>.
 If you have a question for a specific project, please write the name of the project between brackets (e.g. [ProjectName]: object of the question) in the email header.
 
 ### Class Schedule
-The course begins on January 9th 2019 and finishes during the week of April 15th 2019.
+The 
+begins on January 9th 2019 and finishes during the week of April 15th 2019.
 
 ### Class hours:
 - Wednesday: 3:30pm-5:30pm EST (Mila Auditorium)
@@ -39,7 +40,7 @@ A set of GPUs will be reserved for 8 hours, starting 30 minutes before the begin
 
 ### NDA
 The NDA can be found here ([french](https://github.com/mila-iqia/digit-detection/blob/master/nda/nda-francais.pdf), [english](https://github.com/mila-iqia/digit-detection/blob/master/nda/nda-english.pdf)).
-The document must be signed and returned before January 16th 2019. A paper version can be given to the TAs or a scanned version can be sent to <ift6759@mila.quebec>.
+The document must be signed and returned before January 16th 2019. A paper version can be given to the assistants or a scanned version can be sent to <ift6759@mila.quebec>.
 
 ### Policy on Contribution
 
@@ -49,4 +50,4 @@ That being said, you can feel that it is not fair that one member of your team i
 
 Now, as we will not tolerate any plagiarism, we will not tolerate that a student is relying solely on others to complete the course. If you think that someone in your team is not contributing at all, start by having a team meeting to discuss with the person on how she/he can contribute. Use a positive and respectful attitude and try to help the person find a way to contribute. As an example, if the person is lacking programming skills, try to organize programming sessions in pairs where one person is programming and the other one is verifying the code, asking questions and making recommendations. Also, remember that everyone must program and so, there should be a turnaround.
 
-If you think the person is not contributing on purpose, send an email to the TAs responsible for your project. After receiving the email, we will schedule a meeting with all team members so that everyone can discuss their point of view.  Everyone should be able to justify their position with some relevant material (code, report, emails, etc.). Finally, the TAs and the professors will take actions to resolve the problem.
+If you think the person is not contributing on purpose, send an email to the assistants responsible for your project. After receiving the email, we will schedule a meeting with all team members so that everyone can discuss their point of view.  Everyone should be able to justify their position with some relevant material (code, report, emails, etc.). Finally, the assistants and the professors will take actions to resolve the problem.
