@@ -9,7 +9,7 @@ To be able to run this image on Helios you need to first run the following comma
 
 `source /rap/jvb-000-aa/COURS2019/etudiants/common.env`
 
-And then append it at the end of your `~/.bashrc` using 
+And then append it at the end of your `~/.bashrc` using
 
 `echo 'source /rap/jvb-000-aa/COURS2019/etudiants/common.env' >> ~/.bashrc`
 
@@ -18,7 +18,7 @@ When singularity is properly loaded, you simply have to run `singularity shell -
 ## Build
 You should not need to re-build an image from scratch but if you are interested it goes as follows. Note that you need admin right to be able to build images.
 
-To build the ift6759.simg image you first need to download the [recipe we used](https://github.com/mila-udem/ift6759/blob/master/container/build_ift6759_img.sh) and [version 10 of cuDNN](https://developer.nvidia.com/compute/machine-learning/cudnn/secure/v7.4.2/prod/10.0_20181213/cudnn-10.0-linux-x64-v7.4.2.24.tgz) to your home directory.
+To build the ift6759.simg image you first need to download the [recipe we used](https://github.com/mila-iqia/digit-detection/blob/master/project/container/build_ift6759_img.sh) and [version 10 of cuDNN](https://developer.nvidia.com/compute/machine-learning/cudnn/secure/v7.4.2/prod/10.0_20181213/cudnn-10.0-linux-x64-v7.4.2.24.tgz) to your home directory.
 
 Then edit `build_ift6759_img.sh` to set the proper path to your home directory.
 

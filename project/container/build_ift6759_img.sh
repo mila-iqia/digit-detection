@@ -15,7 +15,7 @@ From: ubuntu:16.04
 %files
     # CUDNN archive must be on local host
     # Download https://developer.nvidia.com/compute/machine-learning/cudnn/secure/v7.4.2/prod/10.0_20181213/cudnn-10.0-linux-x64-v7.4.2.24.tgz to your home dir
-    /home/YOUR_LOCAL_HOME_CHANGE_THIS/cudnn-10.0-linux-x64-v7.4.2.24.tgz /cudnn-10.0-linux-x64-v7.4.2.24.tgz
+    $HOME/cudnn-10.0-linux-x64-v7.4.2.24.tgz
 
 %environment
     PATH=/usr/local/nvidia/bin:/usr/local/cuda/bin:/miniconda/bin:${PATH}
@@ -28,7 +28,7 @@ From: ubuntu:16.04
 %post
     # Basic utilies
     apt-get update
-    apt-get install -y wget gnupg2 curl ca-certificates libopenblas-dev ninja-build vim emacs nano htop less
+    apt-get install -y wget gnupg2 curl ca-certificates libopenblas-dev ninja-build vim emacs nano htop less bzip2
     DEBIAN_FRONTEND=noninteractive apt-get install keyboard-configuration -y
 
     # Install CUDA from network deb package
@@ -51,7 +51,10 @@ From: ubuntu:16.04
     export PATH=/miniconda/bin:$PATH
 
     # Install pytorch with conda
-    conda install python=3.6 pytorch=1.0.0 torchvision=0.2.1 cuda100 -c pytorch
-    conda install ipython scikit-learn holoviews seaborn tqdm packaging appdirs git opencv scikit-image joblib
-    conda install -c conda-forge tensorboardx multicore-tsne
-    pip install gpustat easydict comet_ml
+    conda install python=3.6 pytorch=1.0.0 torchvision=0.2.1 cuda100 faiss-gpu -c pytorch
+    conda install ipython scikit-learn holoviews seaborn tqdm packaging appdirs git opencv scikit-image joblib pywavelets
+    conda install -c conda-forge tensorboardx multicore-tsne scikit-optimize yacs
+    pip install gpustat easydict comet_ml cython ruamel.yaml biosppy
+
+    apt-get clean -y
+    conda clean --all -y
